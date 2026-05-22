@@ -1,0 +1,53 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# ── Environnements virtuels ───────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Fichiers secrets — JAMAIS dans git ───────────────────────────────────────
+backend/.env
+backend/.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ── Bases de données GeoIP (trop volumineuses) ───────────────────────────────
+backend/GeoLite2-City.mmdb
+backend/GeoLite2-Country.mmdb
+*.mmdb
+
+# ── Médias uploadés (upload manuel via FTP) ──────────────────────────────────
+backend/media/
+
+# ── Fichiers statiques générés par collectstatic ─────────────────────────────
+backend/staticfiles/
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/dist.zip
+frontend/.cache/
+
+# ── Vieux settings monolithique (remplacé par settings/) ─────────────────────
+backend/backend/settings.py
+
+# ── IDE & OS ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+*.log
+
+# ── Seed scripts locaux ───────────────────────────────────────────────────────
+backend/seed.bat

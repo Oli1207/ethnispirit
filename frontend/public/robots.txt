@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Pages privées — pas d'indexation
+Disallow: /compte
+Disallow: /panier
+Disallow: /commande
+Disallow: /paiement-succes
+Disallow: /paiement-echec
+Disallow: /admin-dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /mot-de-passe-oublie
+Disallow: /reset-password
+
+# Sitemap
+Sitemap: https://ethnispirit.fr/sitemap.xml

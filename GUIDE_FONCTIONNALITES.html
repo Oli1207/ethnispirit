@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EthniSpirit — Guide des fonctionnalités</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --tc:        #C65D3B;
+      --tc-light:  #E8A98A;
+      --bio:       #2D5A2E;
+      --bio-light: #7FB87F;
+      --cream:     #FAF7F2;
+      --sand:      #E8E0D5;
+      --text:      #1A1612;
+      --text-mid:  #6B5D52;
+      --text-light:#9B8E84;
+      --radius:    14px;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.75;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #1A1612 0%, #2D1F18 50%, #1A2D1B 100%);
+      color: #fff;
+      padding: 64px 40px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(198,93,59,.25) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 50%, rgba(45,90,46,.2) 0%, transparent 60%);
+    }
+    .header-inner { position: relative; z-index: 1; }
+    .header-eyebrow {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--tc-light);
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 400;
+      letter-spacing: -.01em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .header h1 em { font-style: italic; color: var(--tc-light); }
+    .header-sub {
+      font-family: 'Arial', sans-serif;
+      font-size: 14px;
+      color: rgba(255,255,255,.6);
+      margin-top: 8px;
+    }
+    .header-badges {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .badge i { font-size: 11px; }
+    .badge-mode { background: rgba(198,93,59,.2); color: var(--tc-light); border: 1px solid rgba(198,93,59,.3); }
+    .badge-bio  { background: rgba(45,90,46,.2);  color: var(--bio-light); border: 1px solid rgba(45,90,46,.3); }
+    .badge-ok   { background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.15); }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+
+    /* ── INTRO ── */
+    .intro {
+      background: #fff;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 48px;
+      font-size: 15px;
+      color: var(--text-mid);
+      line-height: 1.8;
+    }
+    .intro strong { color: var(--text); }
+
+    /* ── SECTION ── */
+    .section {
+      background: #fff;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      overflow: hidden;
+      break-inside: avoid;
+    }
+    .section-header {
+      padding: 22px 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      border-bottom: 1px solid var(--sand);
+    }
+    .section-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .icon-mode    { background: rgba(198,93,59,.1);  color: var(--tc); }
+    .icon-bio     { background: rgba(45,90,46,.1);   color: var(--bio); }
+    .icon-gold    { background: rgba(230,160,32,.1); color: #C07800; }
+    .icon-blue    { background: rgba(38,128,194,.1); color: #2680C2; }
+    .icon-neutral { background: rgba(100,100,100,.08); color: var(--text-mid); }
+    .icon-purple  { background: rgba(130,80,190,.1); color: #8250BE; }
+    .icon-dual    { background: linear-gradient(135deg, rgba(198,93,59,.12), rgba(45,90,46,.12)); color: var(--text-mid); }
+
+    .section-num {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .section-title em { font-style: italic; color: var(--tc); }
+    .section-body { padding: 24px 28px; }
+    .section-body p { font-size: 14px; color: var(--text-mid); margin-bottom: 14px; line-height: 1.75; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body strong { color: var(--text); }
+
+    /* ── IMPACT BOX ── */
+    .impact {
+      background: var(--cream);
+      border-left: 3px solid var(--tc);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 18px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-mid);
+    }
+    .impact.bio { border-left-color: var(--bio); }
+    .impact strong { color: var(--text); }
+
+    /* ── BULLET LIST ── */
+    .feat-list {
+      list-style: none;
+      margin: 12px 0;
+    }
+    .feat-list li {
+      font-size: 14px;
+      color: var(--text-mid);
+      padding: 5px 0 5px 22px;
+      position: relative;
+    }
+    .feat-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--tc);
+    }
+
+    /* ── TABLE ── */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Arial', sans-serif;
+      font-size: 13px;
+    }
+    .summary-table th {
+      background: var(--cream);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-light);
+      border-bottom: 1px solid var(--sand);
+    }
+    .summary-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--sand);
+      color: var(--text-mid);
+      vertical-align: middle;
+    }
+    .summary-table tr:last-child td { border-bottom: none; }
+    .summary-table tr:hover td { background: var(--cream); }
+    .summary-table td strong { color: var(--text); }
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .tag-conversion { background: rgba(198,93,59,.1);   color: var(--tc); }
+    .tag-gestion    { background: rgba(100,100,100,.09); color: #666; }
+    .tag-ux         { background: rgba(38,128,194,.1);  color: #2680C2; }
+    .tag-marketing  { background: rgba(130,80,190,.1);  color: #8250BE; }
+    .tag-retention  { background: rgba(230,160,32,.12); color: #C07800; }
+    .tag-archi      { background: rgba(45,90,46,.1);    color: var(--bio); }
+    .status-ok {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--bio);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .status-ok i { font-size: 11px; }
+
+    /* ── CODE BLOCK ── */
+    .deploy-box {
+      background: #1A1612;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .deploy-box-header {
+      padding: 10px 20px;
+      background: rgba(255,255,255,.05);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .deploy-box-header i { font-size: 11px; color: rgba(255,255,255,.3); }
+    .deploy-box pre {
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(255,255,255,.85);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .deploy-box pre .comment { color: rgba(255,255,255,.3); }
+    .deploy-box pre .key { color: var(--tc-light); }
+    .deploy-box pre .val { color: var(--bio-light); }
+
+    /* ── CRON ITEMS ── */
+    .cron-list { list-style: none; margin: 0; }
+    .cron-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--sand);
+      font-size: 13px;
+    }
+    .cron-list li:last-child { border-bottom: none; }
+    .cron-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .cron-icon.mode { background: rgba(198,93,59,.1); color: var(--tc); }
+    .cron-icon.bio  { background: rgba(45,90,46,.1);  color: var(--bio); }
+    .cron-icon.gold { background: rgba(230,160,32,.1); color: #C07800; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--sand), transparent);
+      margin: 40px 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 48px 24px 40px;
+      font-family: 'Arial', sans-serif;
+      font-size: 12px;
+      color: var(--text-light);
+      border-top: 1px solid var(--sand);
+    }
+    .footer-logo {
+      font-family: 'Georgia', serif;
+      font-size: 20px;
+      color: var(--tc);
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .header { padding: 40px 20px 36px; }
+      .container { padding: 32px 16px 60px; }
+      .section-body, .section-header { padding: 18px 20px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .section { break-inside: avoid; box-shadow: none; }
+      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-inner">
+    <p class="header-eyebrow">Documentation technique · Mai 2026</p>
+    <h1>EthniSpirit —<br>Guide des <em>fonctionnalités</em></h1>
+    <p class="header-sub">Plateforme e-commerce double univers · Mode Antillaise &amp; Bio &amp; Naturel</p>
+    <div class="header-badges">
+      <span class="badge badge-mode"><i class="fa-solid fa-shirt"></i> Mode Antillaise</span>
+      <span class="badge badge-bio"><i class="fa-solid fa-leaf"></i> Bio &amp; Naturel</span>
+      <span class="badge badge-ok"><i class="fa-solid fa-circle-check"></i> 15 fonctionnalités livrées</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── BODY ─────────────────────────────────────────────────────────────── -->
+<div class="container">
+
+  <!-- Intro -->
+  <div class="intro">
+    Ce document présente l'ensemble des fonctionnalités développées pour <strong>EthniSpirit</strong>.
+    Chaque section décrit ce qui a été construit, comment cela fonctionne, et quel bénéfice concret
+    cela apporte à la boutique et à ses clientes.
+  </div>
+
+  <!-- 1. Double univers -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-dual"><i class="fa-solid fa-globe"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 01</p>
+        <h2 class="section-title">Double univers — <em>Mode Antillaise</em> &amp; Bio &amp; Naturel</h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Le site est structuré en deux univers distincts avec chacun sa propre identité visuelle, sa palette de couleurs, sa navigation et son catalogue.</p>
+      <ul class="feat-list">
+        <li><strong>Mode Antillaise</strong> (<code>/</code>, <code>/catalogue</code>) — tons terracotta, fil rouge dans toute l'interface</li>
+        <li><strong>Bio &amp; Naturel</strong> (<code>/bio</code>, <code>/bio/catalogue</code>) — tons verts, ambiance naturelle et apaisante</li>
+        <li>Les deux univers partagent le même moteur : panier, compte client, checkout, commandes</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Une cliente qui cherche une robe madras et une cliente qui cherche une huile de soin vivent une expérience cohérente avec leur univers — sans se mélanger.
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Modal de bienvenue -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-mode"><i class="fa-solid fa-gift"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 02</p>
+        <h2 class="section-title">Modal de bienvenue avec <em>code promo automatique</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>À la première visite, un modal de bienvenue s'affiche avec un code promo exclusif. Le modal est entièrement configurable depuis le tableau de bord admin :</p>
+      <ul class="feat-list">
+        <li>Titre, message, code et valeur personnalisables</li>
+        <li><strong>Univers cible</strong> : réservé à Mode, réservé à Bio, ou affiché sur les deux</li>
+        <li>Le bouton <strong>"Profiter de l'offre"</strong> enregistre automatiquement le code et redirige vers le catalogue — le code est déjà actif sans aucune saisie</li>
+        <li>Le modal ne s'affiche qu'une seule fois par navigateur</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Taux de conversion amélioré sur les premières visites. Le code s'applique sans aucune friction.
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Codes promo -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-purple"><i class="fa-solid fa-tag"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 03</p>
+        <h2 class="section-title">Codes promo <em>multi-univers</em> avec règles de cumul</h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Un système de codes promo complet avec des règles de cumul intelligentes.</p>
+      <p><strong>Création des codes (admin) :</strong></p>
+      <ul class="feat-list">
+        <li>Pourcentage ou montant fixe</li>
+        <li>Date de début / fin de validité et limite d'utilisation</li>
+        <li><strong>Univers</strong> : s'applique aux produits Mode, Bio, ou à tout le panier</li>
+      </ul>
+      <p><strong>Règles de cumul :</strong></p>
+      <ul class="feat-list">
+        <li>Maximum 2 codes actifs en même temps, à condition qu'ils ciblent des univers différents</li>
+        <li>Un code <em>all</em> bloque tout ajout supplémentaire</li>
+        <li>Règles vérifiées côté serveur — impossibles à contourner</li>
+        <li>Chaque code appliqué s'affiche avec sa remise exacte et un badge coloré</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Promotions ciblées par collection sans risque d'abus ou de cumul non souhaité.
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Filtres catalogue -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue"><i class="fa-solid fa-sliders"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 04</p>
+        <h2 class="section-title">Filtres et tri du <em>catalogue</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Une barre de filtres disponible sur les pages catalogue Mode et Bio :</p>
+      <ul class="feat-list">
+        <li><strong>Tri</strong> : pertinence, prix croissant/décroissant, nouveautés</li>
+        <li><strong>En stock uniquement</strong> : masque les articles en rupture</li>
+        <li><strong>Certification/label</strong> : Bio, Artisanal, Fait main… sous forme de chips sélectionnables</li>
+        <li>Filtrage instantané sans rechargement de page, bouton de réinitialisation</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Les clientes trouvent ce qu'elles cherchent plus vite. Le filtre "En stock" évite la frustration de cliquer sur un article indisponible.
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Produits similaires -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-mode"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 05</p>
+        <h2 class="section-title">Produits similaires — <em>"Vous aimerez aussi"</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Sur chaque fiche produit, une section <strong>"Vous aimerez aussi"</strong> affiche jusqu'à 4 produits de la même catégorie. Les suggestions sont actives, en stock et excluent le produit en cours de consultation.</p>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Augmente le panier moyen et le temps passé sur le site.
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Prévenez-moi -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-gold"><i class="fa-solid fa-bell"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 06</p>
+        <h2 class="section-title">Alerte retour en stock — <em>"Prévenez-moi"</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Quand un produit est en rupture de stock, un bouton <strong>"Prévenez-moi dès le retour"</strong> s'affiche sur la fiche produit.</p>
+      <ul class="feat-list">
+        <li>La cliente laisse son email et optionnellement son numéro de téléphone</li>
+        <li>Une seule inscription possible par email par produit (pas de doublons)</li>
+        <li>Dès que le stock est réapprovisionné, un email de notification est envoyé automatiquement</li>
+        <li>L'admin visualise toutes les demandes dans le panneau Alertes stock</li>
+      </ul>
+      <div class="impact bio">
+        <strong>Impact boutique :</strong> Aucune vente perdue sur rupture. Les clientes intéressées reviennent d'elles-mêmes.
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Alertes stock admin -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-gold"><i class="fa-solid fa-chart-line"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 07</p>
+        <h2 class="section-title">Alertes de stock bas — <em>interface admin</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Un panneau dans la page Gestion des produits pour configurer les alertes :</p>
+      <ul class="feat-list">
+        <li><strong>Seuil configurable</strong> : alerte déclenchée quand le stock passe sous le seuil choisi</li>
+        <li><strong>Email de notification</strong> : l'adresse qui reçoit les alertes admin</li>
+        <li><strong>Activation / désactivation</strong> des alertes en un clic</li>
+        <li>Liste des clients en attente de réapprovisionnement, séparée par statut (En attente / Déjà notifiés)</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> L'admin est alertée avant d'atteindre la rupture complète, et voit en un coup d'œil quels clients attendent un réapprovisionnement.
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Email confirmation -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue"><i class="fa-solid fa-envelope-circle-check"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 08</p>
+        <h2 class="section-title">Email de <em>confirmation de commande</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Dès qu'un paiement est confirmé, la cliente reçoit automatiquement un email contenant :</p>
+      <ul class="feat-list">
+        <li>Récapitulatif complet des articles avec quantités et prix</li>
+        <li>Montant total de la commande</li>
+        <li><strong>Lien de suivi de commande</strong> direct — sans créer de compte</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Rassure la cliente immédiatement après l'achat et réduit les contacts support "où est ma commande ?".
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Page suivi commande -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue"><i class="fa-solid fa-magnifying-glass-location"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 09</p>
+        <h2 class="section-title">Page de <em>suivi de commande</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Une page publique <code>/suivi-commande</code> permet à n'importe quelle cliente de retrouver sa commande en saisissant sa <strong>référence</strong> et son <strong>adresse e-mail</strong>.</p>
+      <ul class="feat-list">
+        <li>Statut en temps réel : En attente — Payée — En traitement — Expédiée — Livrée</li>
+        <li>Affichage de la liste des articles, de la date et du total</li>
+        <li>Accessible sans compte — le lien est inclus dans l'email de confirmation</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Autonomie totale pour la cliente. Zéro email de support pour des questions de suivi basiques.
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Panier abandonné -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-mode"><i class="fa-solid fa-cart-arrow-down"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 10</p>
+        <h2 class="section-title">Email de relance — <em>panier abandonné</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Quand une cliente commence à remplir le formulaire de commande sans le finaliser, le système lui envoie automatiquement un email de relance après <strong>2 heures</strong>.</p>
+      <ul class="feat-list">
+        <li>L'email contient la liste des articles laissés dans le panier</li>
+        <li>Lien direct pour revenir finaliser la commande</li>
+        <li>Pas d'envoi si la cliente a passé une commande dans les 24 dernières heures</li>
+        <li>Pas d'envoi si le panier est vide</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Récupération automatique des paniers abandonnés — une source de revenus directe sans aucune intervention manuelle.
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Email avis -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-gold"><i class="fa-solid fa-star-half-stroke"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 11</p>
+        <h2 class="section-title">Email d'avis <em>post-achat</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>7 jours après qu'une commande passe au statut <em>"Livrée"</em>, la cliente reçoit automatiquement un email lui demandant de laisser un avis sur les produits achetés.</p>
+      <ul class="feat-list">
+        <li>Lien direct vers chaque fiche produit pour déposer un avis</li>
+        <li>Un seul email par commande — jamais envoyé deux fois</li>
+        <li>Déclenché automatiquement par une tâche planifiée quotidienne</li>
+      </ul>
+      <div class="impact bio">
+        <strong>Impact boutique :</strong> Les avis clients se collectent automatiquement et renforcent la preuve sociale sur les fiches produit.
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Preuve sociale -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-neutral"><i class="fa-solid fa-users"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 12</p>
+        <h2 class="section-title">Preuve sociale — <em>ventes et notes</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Sur chaque fiche produit, deux indicateurs sociaux sont affichés :</p>
+      <ul class="feat-list">
+        <li><strong>Note moyenne</strong> calculée à partir des avis clients, affichée en étoiles avec le nombre d'avis</li>
+        <li><strong>Compteur de ventes</strong> : "X personnes ont déjà acheté cet article"</li>
+        <li>Mis à jour automatiquement à chaque nouvelle commande et à chaque nouvel avis</li>
+      </ul>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Réduit l'hésitation à l'achat. Un article avec 47 ventes et 4,8 étoiles se vend mieux qu'un article sans indication.
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Export CSV -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-neutral"><i class="fa-solid fa-file-arrow-down"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 13</p>
+        <h2 class="section-title">Export des commandes en <em>CSV</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Dans le tableau de bord admin, un bouton <strong>"Exporter CSV"</strong> génère et télécharge immédiatement un fichier contenant toutes les commandes avec leurs détails : référence, date, statut, client, montant, articles, adresse de livraison.</p>
+      <div class="impact">
+        <strong>Impact boutique :</strong> Compatible avec Excel, Google Sheets et tous les outils comptables. Idéal pour la gestion mensuelle ou pour un prestataire comptable.
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. PWA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-blue"><i class="fa-solid fa-mobile-screen-button"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 14</p>
+        <h2 class="section-title">PWA — <em>Application installable</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Le site est une <strong>Progressive Web App</strong> : sur mobile, les clientes peuvent l'installer sur leur écran d'accueil comme une vraie application, sans passer par l'App Store.</p>
+      <ul class="feat-list">
+        <li>Icône personnalisée EthniSpirit sur l'écran d'accueil</li>
+        <li>Chargement instantané même avec une connexion lente</li>
+        <li>Expérience plein écran sans barre de navigation du navigateur</li>
+      </ul>
+      <div class="impact bio">
+        <strong>Impact boutique :</strong> Engagement accru. Une cliente qui installe l'app revient plus souvent qu'une cliente qui passe uniquement par le navigateur.
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. Admin dashboard -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-neutral"><i class="fa-solid fa-gauge-high"></i></div>
+      <div>
+        <p class="section-num">Fonctionnalité 15</p>
+        <h2 class="section-title">Tableau de bord administrateur <em>complet</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Un espace admin accessible uniquement aux administrateurs, avec 9 sections dédiées :</p>
+      <table class="summary-table" style="margin-top:8px;">
+        <thead>
+          <tr>
+            <th>Section</th>
+            <th>Contenu</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Dashboard</strong></td><td>Statistiques temps réel : CA du jour/mois, commandes, produits actifs</td></tr>
+          <tr><td><strong>Commandes</strong></td><td>Liste complète, filtres par statut, mise à jour du statut, export CSV</td></tr>
+          <tr><td><strong>Produits</strong></td><td>Création/modification/suppression, gestion des images, alertes stock</td></tr>
+          <tr><td><strong>Catégories</strong></td><td>Création/modification/suppression par univers (Mode ou Bio)</td></tr>
+          <tr><td><strong>Livraison</strong></td><td>Configuration des tarifs par destination</td></tr>
+          <tr><td><strong>Codes promo</strong></td><td>Création/modification/suppression, gestion par univers</td></tr>
+          <tr><td><strong>Newsletter</strong></td><td>Liste des abonnées, export CSV</td></tr>
+          <tr><td><strong>Contacts</strong></td><td>Messages reçus via le formulaire de contact</td></tr>
+          <tr><td><strong>Analytics</strong></td><td>Suivi des pages vues et des événements clés</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Summary table -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-bio"><i class="fa-solid fa-list-check"></i></div>
+      <div>
+        <p class="section-num">Récapitulatif</p>
+        <h2 class="section-title">Résumé des <em>15 fonctionnalités</em></h2>
+      </div>
+    </div>
+    <div class="section-body" style="padding:0;">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fonctionnalité</th>
+            <th>Type</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>01</td><td><strong>Double univers Mode &amp; Bio</strong></td><td><span class="tag tag-archi">Architecture</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>02</td><td><strong>Modal de bienvenue + code promo auto</strong></td><td><span class="tag tag-conversion">Conversion</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>03</td><td><strong>Codes promo multi-univers avec règles de cumul</strong></td><td><span class="tag tag-marketing">Marketing</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>04</td><td><strong>Filtres et tri du catalogue</strong></td><td><span class="tag tag-ux">UX</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>05</td><td><strong>Produits similaires</strong></td><td><span class="tag tag-conversion">Conversion</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>06</td><td><strong>Alerte retour en stock — "Prévenez-moi"</strong></td><td><span class="tag tag-retention">Rétention</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>07</td><td><strong>Alertes stock bas — interface admin</strong></td><td><span class="tag tag-gestion">Gestion</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>08</td><td><strong>Email de confirmation de commande</strong></td><td><span class="tag tag-ux">Post-achat</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>09</td><td><strong>Page de suivi de commande</strong></td><td><span class="tag tag-gestion">Support</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>10</td><td><strong>Email de relance panier abandonné</strong></td><td><span class="tag tag-retention">Récupération</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>11</td><td><strong>Email d'avis post-achat</strong></td><td><span class="tag tag-marketing">Réputation</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>12</td><td><strong>Preuve sociale (ventes + notes)</strong></td><td><span class="tag tag-conversion">Conversion</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>13</td><td><strong>Export commandes CSV</strong></td><td><span class="tag tag-gestion">Gestion</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>14</td><td><strong>PWA — Application installable</strong></td><td><span class="tag tag-ux">Engagement</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+          <tr><td>15</td><td><strong>Tableau de bord admin (9 sections)</strong></td><td><span class="tag tag-gestion">Gestion</span></td><td><span class="status-ok"><i class="fa-solid fa-circle-check"></i> Livré</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Note de déploiement -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon icon-neutral"><i class="fa-solid fa-server"></i></div>
+      <div>
+        <p class="section-num">Déploiement</p>
+        <h2 class="section-title">Note de <em>mise en production</em></h2>
+      </div>
+    </div>
+    <div class="section-body">
+      <p>Avant la mise en ligne, exécuter les migrations de base de données :</p>
+      <div class="deploy-box">
+        <div class="deploy-box-header"><i class="fa-solid fa-terminal"></i> Terminal — Backend</div>
+        <pre>python manage.py migrate</pre>
+      </div>
+
+      <p style="margin-top:20px;">Configurer les <strong>3 tâches cron</strong> sur le cPanel LWS :</p>
+      <ul class="cron-list">
+        <li>
+          <div class="cron-icon mode"><i class="fa-solid fa-cart-arrow-down"></i></div>
+          <div>
+            <strong>Relance paniers abandonnés</strong> — toutes les heures<br>
+            <code style="font-size:12px;color:var(--text-mid);">python manage.py send_abandoned_cart_emails</code>
+          </div>
+        </li>
+        <li>
+          <div class="cron-icon gold"><i class="fa-solid fa-bell"></i></div>
+          <div>
+            <strong>Notifications retour en stock</strong> — toutes les heures<br>
+            <code style="font-size:12px;color:var(--text-mid);">python manage.py send_restock_notifications</code>
+          </div>
+        </li>
+        <li>
+          <div class="cron-icon bio"><i class="fa-solid fa-star-half-stroke"></i></div>
+          <div>
+            <strong>Emails d'avis post-achat</strong> — une fois par jour<br>
+            <code style="font-size:12px;color:var(--text-mid);">python manage.py send_review_requests</code>
+          </div>
+        </li>
+      </ul>
+
+      <p style="margin-top:20px;">Variables d'environnement SMTP à configurer dans le fichier <code>.env</code> :</p>
+      <div class="deploy-box">
+        <div class="deploy-box-header"><i class="fa-solid fa-gear"></i> Fichier .env — Configuration SMTP LWS</div>
+        <pre><span class="key">EMAIL_HOST</span>=<span class="val">mail.ethnispirit.fr</span>
+<span class="key">EMAIL_PORT</span>=<span class="val">465</span>
+<span class="key">EMAIL_HOST_USER</span>=<span class="val">contact@ethnispirit.fr</span>
+<span class="key">EMAIL_HOST_PASSWORD</span>=<span class="val">***</span>
+<span class="key">EMAIL_USE_SSL</span>=<span class="val">True</span>
+<span class="key">DEFAULT_FROM_EMAIL</span>=<span class="val">EthniSpirit &lt;contact@ethnispirit.fr&gt;</span>
+<span class="key">FRONTEND_URL</span>=<span class="val">https://ethnispirit.fr</span></pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<div class="footer">
+  <div class="footer-logo">EthniSpirit</div>
+  <p>Document généré le 15 mai 2026 &nbsp;·&nbsp; EthniSpirit V1</p>
+</div>
+
+</body>
+</html>
