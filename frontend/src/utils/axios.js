@@ -28,7 +28,11 @@ async function refreshAccessToken() {
     if (!refresh) throw new Error('No refresh token');
     const { data } = await axios.post(`${API_BASE_URL}/api/auth/token/refresh/`, { refresh });
     const isSecure = window.location.protocol === 'https:';
-    Cookies.set('access_token', data.access, { secure: isSecure, sameSite: 'Strict', expires: 1 });
+    Cookies.set('access_token',  data.access,  { secure: isSecure, sameSite: 'Strict', expires: 1 });
+    // ROTATE_REFRESH_TOKENS=True : Django renvoie un nouveau refresh — on le sauvegarde
+    if (data.refresh) {
+      Cookies.set('refresh_token', data.refresh, { secure: isSecure, sameSite: 'Strict', expires: 30 });
+    }
     return data.access;
   })();
 
@@ -47,9 +51,13 @@ axiosInstance.interceptors.request.use(async (config) => {
   if (access && isTokenExpired(access)) {
     try {
       access = await refreshAccessToken();
-    } catch {
-      Cookies.remove('access_token');
-      Cookies.remove('refresh_token');
+    } catch (e) {
+      // Supprime les tokens SEULEMENT si le serveur confirme qu'ils sont invalides (401)
+      // Un 503/réseau pendant un restart Passenger ne doit pas déconnecter l'utilisateur
+      if (e?.response?.status === 401) {
+        Cookies.remove('access_token');
+        Cookies.remove('refresh_token');
+      }
       return config;
     }
   }
@@ -71,9 +79,12 @@ axiosInstance.interceptors.response.use(
         const access = await refreshAccessToken();
         original.headers.Authorization = `Bearer ${access}`;
         return axiosInstance(original);
-      } catch {
-        Cookies.remove('access_token');
-        Cookies.remove('refresh_token');
+      } catch (e) {
+        // Déconnexion uniquement sur 401 réel, pas sur erreur réseau/serveur
+        if (e?.response?.status === 401) {
+          Cookies.remove('access_token');
+          Cookies.remove('refresh_token');
+        }
       }
     }
     return Promise.reject(error);
