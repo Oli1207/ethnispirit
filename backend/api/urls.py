@@ -44,6 +44,11 @@ urlpatterns = [
     path('admin/contacts/<int:msg_id>/read/', views.admin_contact_mark_read, name='admin_contact_mark_read'),
     path('admin/contacts/<int:msg_id>/delete/', views.admin_contact_delete, name='admin_contact_delete'),
 
+    # Demande de produit
+    path('product-request/',                            views.product_request_create,        name='product_request_create'),
+    path('admin/product-requests/',                     views.admin_product_requests_list,   name='admin_product_requests_list'),
+    path('admin/product-requests/<int:req_id>/handle/', views.admin_product_request_handle,  name='admin_product_request_handle'),
+
     # Newsletter
     path('newsletter/subscribe/',         views.newsletter_subscribe,    name='newsletter_subscribe'),
     path('newsletter/subscribers/',       views.newsletter_subscribers,  name='newsletter_subscribers'),

@@ -58,6 +58,7 @@ import FAQScreen              from './views/screens/FAQScreen';
 import LivraisonScreen        from './views/screens/LivraisonScreen';
 import PolicyScreen           from './views/screens/PolicyScreen';
 import OrderTrackingScreen    from './views/screens/OrderTrackingScreen';
+import ProductRequestPage     from './views/screens/ProductRequestPage';
 
 
 // ── Tracker de pages vues ─────────────────────────────────────────────────────
@@ -140,6 +141,7 @@ export default function App() {
           <Route path="/livraison"       element={<LivraisonScreen />} />
           <Route path="/politique"          element={<PolicyScreen />} />
           <Route path="/suivi-commande"    element={<OrderTrackingScreen />} />
+          <Route path="/ma-demande"        element={<ProductRequestPage />} />
 
           <Route path="/compte" element={
             <PrivateRoute><AccountScreen /></PrivateRoute>

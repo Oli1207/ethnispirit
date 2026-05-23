@@ -7,6 +7,7 @@ import useAuthStore from '../../store/auth';
 import useTracking from '../../hooks/useTracking';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
+import ProductRequestModal from '../../components/ProductRequestModal';
 
 // ── Sélecteur d'étoiles interactif ────────────────────────────────────────────
 function StarSelector({ value, onChange }) {
@@ -117,6 +118,7 @@ export default function ProductDetailScreen() {
   const [openSection, setOpenSection] = useState('description');
   const [similar, setSimilar]         = useState([]);
   const [copied, setCopied]           = useState(false);
+  const [prModalOpen, setPrModalOpen] = useState(false);
 
   // ── Notify restock ────────────────────────────────────────────────────────
   const [notifyOpen, setNotifyOpen]     = useState(false);
@@ -846,7 +848,34 @@ export default function ProductDetailScreen() {
           </section>
         )}
 
+        {/* ═══════════════════════════════════════════════════════════════════
+            DEMANDE DE PRODUIT
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section className="eth-pr-trigger-section">
+          <div className="eth-pr-trigger-inner">
+            <div className="eth-pr-trigger-icon">
+              <i className="fa-solid fa-magnifying-glass-plus"></i>
+            </div>
+            <div className="eth-pr-trigger-text">
+              <h3 className="eth-pr-trigger-title">Vous cherchez quelque chose de particulier&nbsp;?</h3>
+              <p className="eth-pr-trigger-desc">
+                Notre catalogue s'enrichit régulièrement, mais si vous avez une pièce précise en tête,
+                dites-le nous — notre équipe fera le nécessaire pour vous la trouver.
+              </p>
+            </div>
+            <button
+              className="btn-eth-primary eth-pr-trigger-btn"
+              onClick={() => setPrModalOpen(true)}
+            >
+              <i className="fa-solid fa-wand-magic-sparkles me-2"></i>
+              Faire une demande
+            </button>
+          </div>
+        </section>
+
       </div>
+
+      <ProductRequestModal isOpen={prModalOpen} onClose={() => setPrModalOpen(false)} />
     </div>
   );
 }

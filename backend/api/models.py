@@ -493,6 +493,24 @@ class WelcomePromoSettings(models.Model):
         return f'Modal bienvenue — {"actif" if self.is_active else "inactif"}'
 
 
+# ── Demande de produit ────────────────────────────────────────────────────────
+class ProductRequest(models.Model):
+    name        = models.CharField(max_length=200, blank=True)
+    email       = models.EmailField(blank=True)
+    description = models.TextField()
+    photo       = models.ImageField(upload_to='product_requests/', blank=True, null=True)
+    is_handled  = models.BooleanField(default=False)
+    date        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date']
+        verbose_name        = 'Demande de produit'
+        verbose_name_plural = 'Demandes de produit'
+
+    def __str__(self):
+        return f'Demande — {self.name or "Anonyme"} — {self.date.strftime("%d/%m/%Y")}'
+
+
 # ── Newsletter ────────────────────────────────────────────────────────────────
 class NewsletterSubscriber(models.Model):
     email     = models.EmailField(unique=True)

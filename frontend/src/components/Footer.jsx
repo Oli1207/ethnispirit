@@ -60,6 +60,12 @@ export default function Footer() {
             <li><Link to="/faq">FAQ</Link></li>
             <li><Link to="/politique">Politique de confidentialité</Link></li>
             <li>
+              <Link to="/ma-demande" className="eth-footer-request-link">
+                <i className="fa-solid fa-magnifying-glass-plus me-1"></i>
+                Faire une demande
+              </Link>
+            </li>
+            <li>
               <Link to="/bio" className="eth-footer-bio-link">
                 <i className="fa-solid fa-leaf me-1"></i>
                 Bio &amp; Naturel

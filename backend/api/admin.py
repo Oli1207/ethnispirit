@@ -3,7 +3,7 @@ from .models import (
     Category, Subcategory, Product, ProductImage,
     Wishlist, PromoCode, Cart, CartItem,
     Order, OrderItem, NewsletterSubscriber, ProductReview, ShippingZone,
-    ContactMessage,
+    ContactMessage, ProductRequest,
 )
 
 
@@ -107,4 +107,14 @@ class ContactMessageAdmin(admin.ModelAdmin):
     search_fields  = ('name', 'email', 'subject', 'message')
     list_editable  = ('is_read',)
     readonly_fields = ('name', 'email', 'subject', 'message', 'date')
+    ordering       = ('-date',)
+
+
+@admin.register(ProductRequest)
+class ProductRequestAdmin(admin.ModelAdmin):
+    list_display   = ('name', 'email', 'is_handled', 'date')
+    list_filter    = ('is_handled',)
+    search_fields  = ('name', 'email', 'description')
+    list_editable  = ('is_handled',)
+    readonly_fields = ('name', 'email', 'description', 'photo', 'date')
     ordering       = ('-date',)

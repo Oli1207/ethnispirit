@@ -12,7 +12,7 @@ from .models import (
     Category, Product, ProductImage, Wishlist, PromoCode,
     Cart, CartItem, Order, OrderItem, NewsletterSubscriber, ProductReview, ShippingZone,
     ContactMessage, AnalyticsSession, AnalyticsEvent, WelcomePromoSettings,
-    StockAlertSettings, RestockNotification,
+    StockAlertSettings, RestockNotification, ProductRequest,
 )
 from .serializers import (
     CategorySerializer, CategoryWriteSerializer,
@@ -737,6 +737,102 @@ def admin_contact_delete(request, msg_id):
     except ContactMessage.DoesNotExist:
         return Response({'error': 'Message introuvable.'}, status=status.HTTP_404_NOT_FOUND)
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ── Demande de produit ────────────────────────────────────────────────────────
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def product_request_create(request):
+    from django.conf import settings
+    from django.core.mail import send_mail
+
+    description = request.data.get('description', '').strip()
+    if not description:
+        return Response({'error': 'La description est requise.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    name  = request.data.get('name', '').strip()
+    email = request.data.get('email', '').strip()
+    photo = request.FILES.get('photo')
+
+    pr = ProductRequest.objects.create(
+        name=name,
+        email=email,
+        description=description,
+        photo=photo,
+    )
+
+    recipient = getattr(settings, 'CONTACT_RECIPIENT', 'contact@ethnispirit.fr')
+    photo_line = f'\nPhoto jointe : {request.build_absolute_uri(pr.photo.url)}' if pr.photo else ''
+
+    admin_body = (
+        f"Nouvelle demande de produit sur EthniSpirit.\n\n"
+        f"Nom     : {name or 'Non renseigné'}\n"
+        f"Email   : {email or 'Non renseigné'}\n\n"
+        f"Description :\n{description}"
+        f"{photo_line}\n\n"
+        f"---\nConsultez toutes les demandes dans l'administration."
+    )
+    try:
+        send_mail(
+            subject="[EthniSpirit] Nouvelle demande de produit",
+            message=admin_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+    if email:
+        confirm_body = (
+            f"Bonjour{' ' + name if name else ''},\n\n"
+            f"Nous avons bien reçu votre demande de produit.\n"
+            f"Notre équipe va l'examiner et fera son possible pour vous trouver ce que vous cherchez.\n\n"
+            f"Votre demande :\n\"{description}\"\n\n"
+            f"À bientôt,\nL'équipe EthniSpirit\ncontact@ethnispirit.fr"
+        )
+        try:
+            send_mail(
+                subject="Nous avons bien reçu votre demande — EthniSpirit",
+                message=confirm_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    return Response({'message': 'Demande envoyée avec succès.'}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_product_requests_list(request):
+    qs = ProductRequest.objects.all().order_by('-date')
+    data = []
+    for pr in qs:
+        data.append({
+            'id':          pr.id,
+            'name':        pr.name,
+            'email':       pr.email,
+            'description': pr.description,
+            'photo':       request.build_absolute_uri(pr.photo.url) if pr.photo else None,
+            'is_handled':  pr.is_handled,
+            'date':        pr.date,
+        })
+    return Response(data)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def admin_product_request_handle(request, req_id):
+    try:
+        pr = ProductRequest.objects.get(id=req_id)
+    except ProductRequest.DoesNotExist:
+        return Response({'error': 'Demande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+    pr.is_handled = not pr.is_handled
+    pr.save(update_fields=['is_handled'])
+    return Response({'is_handled': pr.is_handled})
 
 
 # ── Newsletter ────────────────────────────────────────────────────────────────

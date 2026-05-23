@@ -98,6 +98,13 @@ export const contactAPI = {
   send: (data) => axiosInstance.post('/api/contact/', data),
 };
 
+// ── Demande de produit ────────────────────────────────────────────────────────
+export const productRequestAPI = {
+  send: (formData) => axiosInstance.post('/api/product-request/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+};
+
 // ── Newsletter ────────────────────────────────────────────────────────────────
 export const newsletterAPI = {
   subscribe: (email, universe = 'mode') =>
