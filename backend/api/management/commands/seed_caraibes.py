@@ -22,7 +22,6 @@ Usage :
 import shutil
 from pathlib import Path
 from django.core.management.base import BaseCommand
-from django.core.files import File
 from django.conf import settings
 
 # Chemins par defaut (machine de developpement Windows)
@@ -503,13 +502,13 @@ class Command(BaseCommand):
                         dest_path.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(src_img, dest_path)
 
-                        # Crée le ProductImage
-                        with open(dest_path, "rb") as f:
-                            ProductImage.objects.create(
-                                product=product,
-                                image=File(f, name=f"products/{clean_name}"),
-                                is_main=True,
-                            )
+                        # Cree le ProductImage avec le chemin relatif direct
+                        # (pas de File() pour eviter le double prefixe upload_to)
+                        ProductImage.objects.create(
+                            product=product,
+                            image=f"products/{clean_name}",
+                            is_main=True,
+                        )
 
                         # Déplace l'image source vers used/
                         shutil.move(str(src_img), str(USED_DIR / src_img.name))
