@@ -2,25 +2,18 @@
 Point d'entrée Phusion Passenger — backend.ethnispirit.com
 ===========================================================
 Ce fichier doit se trouver dans le dossier racine du sous-domaine
-tel que configuré dans cPanel > Sous-domaines.
+(le même dossier que manage.py).
 
-Chemin typique sur LWS :
-  /home/VOTRE_LOGIN/public_html/backend/passenger_wsgi.py
-
-MODIFIER la variable PROJECT_ROOT ci-dessous avec le chemin
-absolu vers le dossier backend/ de l'application Django.
+Le chemin est déterminé dynamiquement via __file__ — aucune
+modification manuelle nécessaire quel que soit le serveur.
 """
 
 import sys
 import os
+from pathlib import Path
 
-# ============================================================
-# MODIFIER ICI — chemin absolu vers le dossier backend/
-# (celui qui contient manage.py)
-# Exemple : /home/monlogin/ethnispirit/backend
-# ============================================================
-PROJECT_ROOT = '/home/VOTRE_LOGIN/ethnispirit/backend'
-# ============================================================
+# Dossier contenant manage.py (= dossier de ce fichier)
+PROJECT_ROOT = str(Path(__file__).resolve().parent)
 
 sys.path.insert(0, PROJECT_ROOT)
 
