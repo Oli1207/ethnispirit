@@ -138,14 +138,21 @@ STATIC_ROOT      = BASE_DIR / 'staticfiles'
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ── Email ─────────────────────────────────────────────────────────────────────
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = env.str('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT          = env.int('EMAIL_PORT', default=587)
-EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = env.str('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL  = env.str('DEFAULT_FROM_EMAIL', default='noreply@ethnispirit.fr')
+# ── GeoIP2 (analytics géographiques) ─────────────────────────────────────────
+GEOIP2_DB_PATH = BASE_DIR / 'GeoLite2-City.mmdb'
+
+
+
+EMAIL_BACKEND      = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST         = 'mail.ethnispirit.com'
+EMAIL_PORT         = 465
+#EMAIL_USE_SSL      = True
+EMAIL_USE_TLS      = True
+EMAIL_HOST_USER    = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = 'support@ethnispirit.com'
+EMAIL_TIMEOUT      = 10
+EMAIL_USE_LOCALTIME = True
 
 # ── Stripe ────────────────────────────────────────────────────────────────────
 # Ces clés DOIVENT être définies dans le fichier .env (jamais en dur ici)

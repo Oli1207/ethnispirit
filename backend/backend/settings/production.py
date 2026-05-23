@@ -38,3 +38,6 @@ CSRF_COOKIE_SECURE    = True
 
 # ── Fichiers statiques (pas de dossier static/ local sur le serveur) ──────────
 STATICFILES_DIRS = []
+
+# ── Email destinataire des messages de contact ────────────────────────────────
+CONTACT_RECIPIENT = 'support@ethnispirit.com'
