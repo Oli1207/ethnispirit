@@ -19,14 +19,19 @@ export default function PaymentSuccessScreen() {
       ordersAPI.verify(oid, sessionId)
         .then(({ data }) => {
           setOrder(data);
-          trackEventStandalone('purchase', {
-            order_oid: data.oid,
-            value:     parseFloat(data.total),
-          });
+          // On track l'achat seulement si le paiement est confirmé
+          if (!data._stripe_pending) {
+            trackEventStandalone('purchase', {
+              order_oid: data.oid,
+              value:     parseFloat(data.total),
+            });
+          }
         })
         .catch((err) => {
-          const msg = err.response?.data?.error || 'Impossible de vérifier le paiement.';
-          setVerifyErr(msg);
+          // Si le serveur retourne une erreur structurée on l'affiche, sinon message générique discret
+          const serverMsg = err.response?.data?.error;
+          if (serverMsg) setVerifyErr(serverMsg);
+          // Erreur réseau ou 5xx non bloquante : on ne montre rien (le paiement est passé chez Stripe)
         })
         .finally(() => setLoading(false));
     }, 800);

@@ -5,14 +5,15 @@ import { formatPrice } from '../../utils/currency';
 import MobileBackButton from '../../components/MobileBackButton';
 
 const SHORTCUTS = [
-  { to: '/admin-dashboard/produits',   icon: 'fa-box',          label: 'Produits',    desc: 'Ajouter, modifier, archiver' },
-  { to: '/admin-dashboard/commandes',  icon: 'fa-bag-shopping', label: 'Commandes',   desc: 'Suivi et statuts' },
-  { to: '/admin-dashboard/categories', icon: 'fa-tags',         label: 'Catégories',  desc: 'Mode et Bio' },
-  { to: '/admin-dashboard/promo',      icon: 'fa-tag',          label: 'Codes promo', desc: 'Créer et gérer les réductions' },
-  { to: '/admin-dashboard/newsletter', icon: 'fa-envelope',     label: 'Newsletter',  desc: 'Liste des abonnés' },
-  { to: '/admin-dashboard/livraison',  icon: 'fa-truck-fast',   label: 'Livraison',   desc: 'Zones et tarifs' },
-  { to: '/admin-dashboard/contacts',   icon: 'fa-comments',     label: 'Messages',    desc: 'Formulaire de contact' },
-  { to: '/admin-dashboard/analytics',  icon: 'fa-chart-line',   label: 'Analytics',   desc: 'Trafic, ventes, géoloc' },
+  { to: '/admin-dashboard/produits',          icon: 'fa-box',                    label: 'Produits',          desc: 'Ajouter, modifier, archiver' },
+  { to: '/admin-dashboard/commandes',         icon: 'fa-bag-shopping',           label: 'Commandes',         desc: 'Suivi et statuts' },
+  { to: '/admin-dashboard/categories',        icon: 'fa-tags',                   label: 'Catégories',        desc: 'Mode et Bio' },
+  { to: '/admin-dashboard/promo',             icon: 'fa-tag',                    label: 'Codes promo',       desc: 'Créer et gérer les réductions' },
+  { to: '/admin-dashboard/newsletter',        icon: 'fa-envelope',               label: 'Newsletter',        desc: 'Liste des abonnés' },
+  { to: '/admin-dashboard/livraison',         icon: 'fa-truck-fast',             label: 'Livraison',         desc: 'Zones et tarifs' },
+  { to: '/admin-dashboard/contacts',          icon: 'fa-comments',               label: 'Messages',          desc: 'Formulaire de contact' },
+  { to: '/admin-dashboard/demandes-produits', icon: 'fa-magnifying-glass-plus',  label: 'Demandes produits', desc: 'Produits recherchés par les visiteurs' },
+  { to: '/admin-dashboard/analytics',         icon: 'fa-chart-line',             label: 'Analytics',         desc: 'Trafic, ventes, géoloc' },
 ];
 
 export default function AdminDashboard() {

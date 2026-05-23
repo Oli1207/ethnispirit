@@ -64,7 +64,19 @@ class CartAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ('product_name', 'product_price', 'quantity', 'subtotal')
+    can_add = False
+    can_delete = False
+    readonly_fields = ('product_name', 'product_price', 'quantity', 'get_subtotal')
+
+    def get_subtotal(self, obj):
+        return f'{obj.subtotal} €'
+    get_subtotal.short_description = 'Sous-total'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Order)

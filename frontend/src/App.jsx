@@ -49,8 +49,9 @@ import AdminNewsletter   from './views/admin/AdminNewsletter';
 import AdminCategories   from './views/admin/AdminCategories';
 import AdminShipping     from './views/admin/AdminShipping';
 import AdminPromoCodes   from './views/admin/AdminPromoCodes';
-import AdminContacts     from './views/admin/AdminContacts';
-import AdminAnalytics    from './views/admin/AdminAnalytics';
+import AdminContacts         from './views/admin/AdminContacts';
+import AdminAnalytics        from './views/admin/AdminAnalytics';
+import AdminProductRequests  from './views/admin/AdminProductRequests';
 
 import OrderConfirmedScreen  from './views/screens/OrderConfirmedScreen';
 import WishlistScreen         from './views/screens/WishlistScreen';
@@ -183,6 +184,9 @@ export default function App() {
           } />
           <Route path="/admin-dashboard/analytics" element={
             <AdminRoute><AdminAnalytics /></AdminRoute>
+          } />
+          <Route path="/admin-dashboard/demandes-produits" element={
+            <AdminRoute><AdminProductRequests /></AdminRoute>
           } />
         </Route>
 

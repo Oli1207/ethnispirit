@@ -552,7 +552,13 @@ def order_payment_verify(request, oid):
         try:
             session = stripe_service.retrieve_session(session_id)
         except Exception:
-            return Response({'error': 'Impossible de vérifier le paiement. Contactez le support.'}, status=status.HTTP_502_BAD_GATEWAY)
+            # Stripe inaccessible ou clé non configurée : retourner la commande telle quelle.
+            # Le webhook Stripe se chargera de marquer le statut 'paid' quand il arrivera.
+            serializer = OrderSerializer(order)
+            return Response({
+                **serializer.data,
+                '_stripe_pending': True,
+            })
 
         # ── Vérification anti-fraude : la session doit appartenir à cette commande ──
         # Sans ce contrôle, un attaquant pourrait réutiliser une session payée d'une
@@ -580,7 +586,12 @@ def order_payment_verify(request, oid):
             return Response(serializer.data)
 
         elif session.payment_status == 'unpaid':
-            return Response({'error': 'Paiement non effectué.'}, status=status.HTTP_400_BAD_REQUEST)
+            # Session créée mais paiement pas encore confirmé (peut arriver en test)
+            serializer = OrderSerializer(order)
+            return Response({
+                **serializer.data,
+                '_stripe_pending': True,
+            })
 
         else:
             return Response({'error': 'Paiement annulé ou invalide.'}, status=status.HTTP_400_BAD_REQUEST)
