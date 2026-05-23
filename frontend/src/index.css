@@ -830,7 +830,7 @@ a { text-decoration: none; color: inherit; }
   transition: transform .22s, box-shadow .22s;
 }
 .eth-product-card:hover { transform: translateY(-5px); box-shadow: var(--sh-md); }
-.eth-prod-img { aspect-ratio: 1; position: relative; overflow: hidden; }
+.eth-prod-img { aspect-ratio: 4/5; position: relative; overflow: hidden; }
 .eth-prod-img img { transition: transform .5s; height: 100%; }
 .eth-product-card:hover .eth-prod-img img { transform: scale(1.06); }
 .eth-prod-badge {
@@ -891,7 +891,7 @@ a { text-decoration: none; color: inherit; }
   transition: transform .22s, box-shadow .22s, border-color .22s;
 }
 .bio-product-card:hover { transform: translateY(-5px); box-shadow: var(--sh-bio-md); border-color: var(--bio-light); }
-.bio-prod-img { aspect-ratio: 1; position: relative; overflow: hidden; }
+.bio-prod-img { aspect-ratio: 4/5; position: relative; overflow: hidden; }
 .bio-prod-img img { transition: transform .5s; height: 100%; }
 .bio-product-card:hover .bio-prod-img img { transform: scale(1.06); }
 .bio-prod-badge {
@@ -1375,8 +1375,8 @@ a { text-decoration: none; color: inherit; }
 .eth-table tbody td { color: var(--text-light); vertical-align: middle; }
 
 /* Produit détail */
-.eth-gallery-main { border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 1; }
-.eth-gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.eth-gallery-main { border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 3/4; }
+.eth-gallery-main img { width: 100%; height: 100%; object-fit: contain; }
 .eth-thumb { background: none; border: 2px solid transparent; border-radius: var(--r-sm); overflow: hidden; width: 60px; height: 60px; padding: 0; cursor: pointer; }
 .eth-thumb.active { border-color: var(--tc-classic); }
 .eth-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -1539,7 +1539,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ── Product cards (consistent naming) ───────────────────────────────── */
-.eth-product-img-wrap { aspect-ratio: 1; position: relative; overflow: hidden; }
+.eth-product-img-wrap { aspect-ratio: 4/5; position: relative; overflow: hidden; }
 .eth-product-img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
 .eth-product-card:hover .eth-product-img { transform: scale(1.06); }
 .eth-product-img-placeholder {
@@ -1573,7 +1573,7 @@ a { text-decoration: none; color: inherit; }
 .eth-btn-cart:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 /* Bio product aliases */
-.bio-product-img-wrap { aspect-ratio: 1; position: relative; overflow: hidden; }
+.bio-product-img-wrap { aspect-ratio: 4/5; position: relative; overflow: hidden; }
 .bio-product-img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
 .bio-product-card:hover .bio-product-img { transform: scale(1.06); }
 .bio-product-img-placeholder {
@@ -2133,9 +2133,9 @@ a { text-decoration: none; color: inherit; }
 .eth-gallery { position: sticky; top: 90px; }
 .eth-gallery-main {
   border-radius: var(--r-lg); overflow: hidden;
-  aspect-ratio: 1; background: var(--sand); position: relative;
+  aspect-ratio: 3/4; background: var(--sand); position: relative;
 }
-.eth-gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.eth-gallery-main img { width: 100%; height: 100%; object-fit: contain; }
 .eth-gallery-placeholder {
   width: 100%; height: 100%; display: flex; align-items: center;
   justify-content: center; color: var(--text-light); font-size: 3rem; background: var(--sand);
@@ -2968,7 +2968,7 @@ a { text-decoration: none; color: inherit; }
 .eth-similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .eth-similar-card { background: var(--white); border-radius: var(--r-lg); border: 1px solid var(--sand); overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: transform .2s, box-shadow .2s; }
 .eth-similar-card:hover { transform: translateY(-4px); box-shadow: var(--sh-md); }
-.eth-similar-card-img { aspect-ratio: 1; overflow: hidden; position: relative; background: var(--sand); }
+.eth-similar-card-img { aspect-ratio: 4/5; overflow: hidden; position: relative; background: var(--sand); }
 .eth-similar-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; }
 .eth-similar-card:hover .eth-similar-card-img img { transform: scale(1.05); }
 .eth-similar-card-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 2rem; }
