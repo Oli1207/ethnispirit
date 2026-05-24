@@ -577,17 +577,19 @@ def order_payment_verify(request, oid):
         return Response({'error': 'Paiement annulé ou invalide.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # ── 4. Mise à jour DB dans une transaction courte (pas d'appel réseau dedans) ──
+    # IMPORTANT : select_for_update() est incompatible avec prefetch_related() sous
+    # Django 5.x (TypeError). On recharge sans prefetch, puis on itère items séparément.
     with transaction.atomic():
-        # Recharger avec verrou pour éviter les doubles mises à jour
-        order = Order.objects.select_for_update().prefetch_related('items').get(oid=oid)
+        order = Order.objects.select_for_update().get(oid=oid)
         if order.status == 'paid':
             # Une autre requête parallèle a déjà traité le paiement
-            return Response(OrderSerializer(order).data)
+            order_full = Order.objects.prefetch_related('items').get(oid=oid)
+            return Response(OrderSerializer(order_full).data)
 
         order.status = 'paid'
         order.save(update_fields=['status'])
 
-        for item in order.items.all():
+        for item in OrderItem.objects.filter(order=order):
             if item.product_id:
                 Product.objects.filter(id=item.product_id).update(
                     stock=F('stock') - item.quantity
