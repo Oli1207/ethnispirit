@@ -14,4 +14,4 @@ Disallow: /mot-de-passe-oublie
 Disallow: /reset-password
 
 # Sitemap
-Sitemap: https://ethnispirit.fr/sitemap.xml
+Sitemap: https://ethnispirit.com/sitemap.xml

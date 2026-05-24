@@ -680,7 +680,7 @@ def contact_send(request):
     # Sauvegarde en base
     ContactMessage.objects.create(name=name, email=email, subject=subject, message=message)
 
-    recipient = getattr(settings, 'CONTACT_RECIPIENT', 'contact@ethnispirit.fr')
+    recipient = getattr(settings, 'CONTACT_RECIPIENT', 'support@ethnispirit.com')
 
     # Email de notification à l'équipe
     admin_body = (
@@ -708,7 +708,7 @@ def contact_send(request):
         f"Nous avons bien reçu votre message concernant « {subject} ».\n"
         f"Notre équipe vous répondra dans les meilleurs délais (sous 24 h ouvrées).\n\n"
         f"Votre message :\n\"{message}\"\n\n"
-        f"À bientôt,\nL'équipe EthniSpirit\ncontact@ethnispirit.fr"
+        f"À bientôt,\nL'équipe EthniSpirit\nsupport@ethnispirit.com"
     )
     try:
         send_mail(
@@ -777,7 +777,7 @@ def product_request_create(request):
         photo=photo,
     )
 
-    recipient = getattr(settings, 'CONTACT_RECIPIENT', 'contact@ethnispirit.fr')
+    recipient = getattr(settings, 'CONTACT_RECIPIENT', 'support@ethnispirit.com')
     photo_line = f'\nPhoto jointe : {request.build_absolute_uri(pr.photo.url)}' if pr.photo else ''
 
     admin_body = (
@@ -805,7 +805,7 @@ def product_request_create(request):
             f"Nous avons bien reçu votre demande de produit.\n"
             f"Notre équipe va l'examiner et fera son possible pour vous trouver ce que vous cherchez.\n\n"
             f"Votre demande :\n\"{description}\"\n\n"
-            f"À bientôt,\nL'équipe EthniSpirit\ncontact@ethnispirit.fr"
+            f"À bientôt,\nL'équipe EthniSpirit\nsupport@ethnispirit.com"
         )
         try:
             send_mail(
@@ -1504,7 +1504,7 @@ def admin_analytics(request):
 # ── Sitemap XML dynamique ─────────────────────────────────────────────────────
 def sitemap_xml(request):
     from django.conf import settings as dj_settings
-    site_url = getattr(dj_settings, 'FRONTEND_URL', 'https://ethnispirit.fr').rstrip('/')
+    site_url = getattr(dj_settings, 'FRONTEND_URL', 'https://ethnispirit.com').rstrip('/')
 
     # Pages statiques
     static_urls = [
@@ -1636,11 +1636,14 @@ def _send_order_confirmation_email(order):
     """
     Envoie un email de confirmation de commande avec récap et lien de suivi.
     """
+    import logging
     from django.conf import settings as dj_settings
     from django.core.mail import send_mail
 
+    logger = logging.getLogger(__name__)
+
     try:
-        frontend_url = getattr(dj_settings, 'FRONTEND_URL', 'https://ethnispirit.fr').rstrip('/')
+        frontend_url = getattr(dj_settings, 'FRONTEND_URL', 'https://ethnispirit.com').rstrip('/')
         tracking_url = f'{frontend_url}/suivi-commande?oid={order.oid}&email={order.email}'
 
         items_lines = '\n'.join(
@@ -1662,7 +1665,7 @@ def _send_order_confirmation_email(order):
             f'  {order.address}\n'
             f'  {order.postal_code} {order.city}, {order.country}\n\n'
             f'Suivez votre commande en temps réel :\n{tracking_url}\n\n'
-            f'À bientôt,\nL\'équipe EthniSpirit\ncontact@ethnispirit.fr'
+            f'À bientôt,\nL\'équipe EthniSpirit\nsupport@ethnispirit.com'
         )
 
         send_mail(
@@ -1670,10 +1673,11 @@ def _send_order_confirmation_email(order):
             message=message,
             from_email=dj_settings.DEFAULT_FROM_EMAIL,
             recipient_list=[order.email],
-            fail_silently=True,
+            fail_silently=False,  # on logue l'erreur si l'envoi échoue
         )
-    except Exception:
-        pass
+        logger.info('Email confirmation envoyé pour commande %s à %s', order.oid, order.email)
+    except Exception as exc:
+        logger.error('Échec email confirmation commande %s : %s', order.oid, exc, exc_info=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -22,7 +22,7 @@ class Command(BaseCommand):
     help = 'Envoie des emails de relance pour les paniers abandonnés.'
 
     def handle(self, *args, **options):
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ethnispirit.fr').rstrip('/')
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ethnispirit.com').rstrip('/')
         cart_url = f'{frontend_url}/panier'
         now = timezone.now()
         two_hours_ago = now - datetime.timedelta(hours=2)
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                 f'Articles en attente :\n{items_lines}\n\n'
                 f'Votre panier vous attend :\n{cart_url}\n\n'
                 f'Les stocks étant limités, nous ne pouvons pas vous garantir leur disponibilité indéfiniment.\n\n'
-                f'À bientôt,\nL\'équipe EthniSpirit\ncontact@ethnispirit.fr'
+                f'À bientôt,\nL\'équipe EthniSpirit\nsupport@ethnispirit.com'
             )
 
             try:

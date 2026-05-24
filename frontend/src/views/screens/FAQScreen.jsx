@@ -52,7 +52,7 @@ const FAQS = [
     items: [
       {
         q: 'Puis-je retourner un article ?',
-        a: 'Oui, vous disposez de 14 jours après réception pour retourner un article en parfait état dans son emballage d\'origine. Contactez-nous à contact@ethnispirit.fr pour initier un retour.',
+        a: 'Oui, vous disposez de 14 jours après réception pour retourner un article en parfait état dans son emballage d\'origine. Contactez-nous à support@ethnispirit.com pour initier un retour.',
       },
       {
         q: 'Comment suivre ma commande ?',

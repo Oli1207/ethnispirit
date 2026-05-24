@@ -251,13 +251,14 @@ python /home/user/ethnispirit/backend/manage.py send_review_requests
 Configurer également les variables d'environnement SMTP dans le fichier `.env` :
 
 ```
-EMAIL_HOST=mail.ethnispirit.fr
+EMAIL_HOST=mail.ethnispirit.com
 EMAIL_PORT=465
-EMAIL_HOST_USER=contact@ethnispirit.fr
+EMAIL_HOST_USER=support@ethnispirit.com
 EMAIL_HOST_PASSWORD=***
 EMAIL_USE_SSL=True
-DEFAULT_FROM_EMAIL=EthniSpirit <contact@ethnispirit.fr>
-FRONTEND_URL=https://ethnispirit.fr
+DEFAULT_FROM_EMAIL=EthniSpirit <support@ethnispirit.com>
+CONTACT_RECIPIENT=support@ethnispirit.com
+FRONTEND_URL=https://ethnispirit.com
 ```
 
 ---

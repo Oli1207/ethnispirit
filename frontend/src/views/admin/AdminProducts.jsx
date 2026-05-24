@@ -98,7 +98,7 @@ function StockAlertsPanel() {
                 type="email" className="form-control eth-input"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="admin@ethnispirit.fr"
+                placeholder="support@ethnispirit.com"
               />
             </div>
             <div>

@@ -51,7 +51,7 @@ export default function ContactScreen() {
               {
                 icon: 'fa-envelope',
                 title: 'Email',
-                detail: 'contact@ethnispirit.fr',
+                detail: 'support@ethnispirit.com',
                 sub: 'Réponse sous 24 h ouvrées',
               },
               {

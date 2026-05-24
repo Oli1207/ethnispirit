@@ -18,7 +18,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 
 const SITE_NAME   = 'EthniSpirit';
-const SITE_URL    = import.meta.env.VITE_SITE_URL || 'https://ethnispirit.fr';
+const SITE_URL    = import.meta.env.VITE_SITE_URL || 'https://ethnispirit.com';
 const DEFAULT_IMG = `${SITE_URL}/icons/og-default.png`;
 const DEFAULT_DESC = 'Mode antillaise authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM.';
 

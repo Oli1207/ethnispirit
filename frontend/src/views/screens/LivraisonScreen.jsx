@@ -125,7 +125,7 @@ export default function LivraisonScreen() {
           <i className="fa-solid fa-circle-info" style={{ color: 'var(--tc-classic)', fontSize: 16, marginTop: 2, flexShrink: 0 }}></i>
           <p style={{ margin: 0, fontSize: 14, color: 'var(--text-mid)', lineHeight: 1.6 }}>
             En cas de retard ou de problème de livraison, contactez-nous à{' '}
-            <strong style={{ color: 'var(--text-dark)' }}>contact@ethnispirit.fr</strong>{' '}
+            <strong style={{ color: 'var(--text-dark)' }}>support@ethnispirit.com</strong>{' '}
             en mentionnant votre numéro de commande. Nous répondons sous 24 h ouvrées.
           </p>
         </div>

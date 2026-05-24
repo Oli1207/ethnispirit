@@ -18,7 +18,7 @@ class Command(BaseCommand):
     help = 'Envoie des emails de notification de réapprovisionnement aux abonnés.'
 
     def handle(self, *args, **options):
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ethnispirit.fr').rstrip('/')
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ethnispirit.com').rstrip('/')
 
         # Notifications non envoyées pour des produits disponibles
         notifications = (
@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 f'  {product.name}\n'
                 f'  Stock disponible : {product.stock} unité(s)\n\n'
                 f'Commandez dès maintenant avant rupture :\n{product_url}\n\n'
-                f'À bientôt,\nL\'équipe EthniSpirit\ncontact@ethnispirit.fr'
+                f'À bientôt,\nL\'équipe EthniSpirit\nsupport@ethnispirit.com'
             )
 
             try:

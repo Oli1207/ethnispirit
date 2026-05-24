@@ -22,12 +22,12 @@ const SECTIONS = [
   {
     icon: 'fa-user-shield',
     title: '5. Vos droits (RGPD)',
-    text: `Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification, de portabilité et de suppression de vos données personnelles. Pour exercer ces droits, contactez-nous à contact@ethnispirit.fr.`,
+    text: `Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification, de portabilité et de suppression de vos données personnelles. Pour exercer ces droits, contactez-nous à support@ethnispirit.com.`,
   },
   {
     icon: 'fa-envelope',
     title: '6. Contact',
-    text: `Pour toute question relative à la protection de vos données personnelles : EthniSpirit — contact@ethnispirit.fr`,
+    text: `Pour toute question relative à la protection de vos données personnelles : EthniSpirit — support@ethnispirit.com`,
   },
 ];
 

@@ -22,7 +22,7 @@ class Command(BaseCommand):
     help = 'Envoie des emails de demande d\'avis aux clients livrés depuis 7 jours.'
 
     def handle(self, *args, **options):
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ethnispirit.fr').rstrip('/')
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ethnispirit.com').rstrip('/')
         cutoff = timezone.now() - datetime.timedelta(days=7)
 
         # Commandes livrées depuis >= 7j, email non envoyé
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                 f'Cela ne prend que quelques secondes !\n\n'
                 f'Donnez votre avis sur :\n{products_str}\n\n'
                 f'Merci pour votre confiance,\n'
-                f'L\'équipe EthniSpirit\ncontact@ethnispirit.fr'
+                f'L\'équipe EthniSpirit\nsupport@ethnispirit.com'
             )
 
             try:
