@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/auth';
 import useCartStore from '../store/cart';
 import logoBio from '../assets/logo_ethnispirit_bio.png';
@@ -9,6 +9,7 @@ export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
   const cart = useCartStore((s) => s.cart);
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const itemCount = cart?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
@@ -139,18 +140,16 @@ export default function Navbar() {
             </li>
           </ul>
           <div className="eth-mobile-actions">
-            <Link to="/panier" className="eth-mobile-icon-row" onClick={() => setMenuOpen(false)}>
-              <i className="fa-solid fa-bag-shopping me-2"></i>
-              Panier {itemCount > 0 && <span className="eth-cart-badge ms-2">{itemCount}</span>}
-            </Link>
             {isAuthenticated ? (
               <>
                 <Link to="/favoris" className="eth-mobile-icon-row" onClick={() => setMenuOpen(false)}>
                   <i className="fa-regular fa-heart me-2"></i>Favoris
                 </Link>
-                <Link to="/compte" className="eth-mobile-icon-row" onClick={() => setMenuOpen(false)}>
-                  <i className="fa-solid fa-user me-2"></i>Mon compte
-                </Link>
+                {(user?.is_staff || user?.is_superuser) && (
+                  <Link to="/admin-dashboard" className="eth-mobile-icon-row" onClick={() => setMenuOpen(false)}>
+                    <i className="fa-solid fa-gauge me-2"></i>Administration
+                  </Link>
+                )}
                 <button className="eth-nav-btn-outline w-100 mt-2" onClick={() => { setMenuOpen(false); handleLogout(); }}>
                   Déconnexion
                 </button>
@@ -168,6 +167,53 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* ── Bottom nav bar — mobile uniquement ──────────────────────────── */}
+      <nav className="eth-bottom-nav" aria-label="Navigation principale">
+        <Link
+          to="/"
+          className={`eth-bottom-nav-item${location.pathname === '/' ? ' active' : ''}`}
+          onClick={() => setMenuOpen(false)}
+        >
+          <i className="fa-solid fa-house"></i>
+          <span>Accueil</span>
+        </Link>
+        <Link
+          to="/catalogue"
+          className={`eth-bottom-nav-item${location.pathname.startsWith('/catalogue') ? ' active' : ''}`}
+          onClick={() => setMenuOpen(false)}
+        >
+          <i className="fa-solid fa-border-all"></i>
+          <span>Catalogue</span>
+        </Link>
+        <Link
+          to="/panier"
+          className={`eth-bottom-nav-item eth-bottom-nav-cart${location.pathname === '/panier' ? ' active' : ''}`}
+          onClick={() => setMenuOpen(false)}
+        >
+          <div className="eth-bottom-nav-cart-wrap">
+            <i className="fa-solid fa-bag-shopping"></i>
+            {itemCount > 0 && <span className="eth-bottom-nav-badge">{itemCount}</span>}
+          </div>
+          <span>Panier</span>
+        </Link>
+        <Link
+          to={isAuthenticated ? '/compte' : '/login'}
+          className={`eth-bottom-nav-item${(location.pathname === '/compte' || location.pathname === '/login') ? ' active' : ''}`}
+          onClick={() => setMenuOpen(false)}
+        >
+          <i className={`fa-solid ${isAuthenticated ? 'fa-user-check' : 'fa-user'}`}></i>
+          <span>{isAuthenticated ? 'Compte' : 'Connexion'}</span>
+        </Link>
+        <button
+          className={`eth-bottom-nav-item eth-bottom-nav-menu${menuOpen ? ' active' : ''}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menu"
+        >
+          <i className={`fa-solid ${menuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
+          <span>Menu</span>
+        </button>
+      </nav>
     </>
   );
 }

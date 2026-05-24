@@ -244,7 +244,7 @@ export default function HomeScreen() {
                 <div key={p.id} className="lp-product-card" data-reveal data-delay={i > 0 ? String(i) : undefined}>
                   <Link to={`/produit/${p.slug}`} className="lp-product-img-wrap">
                     {p.main_image
-                      ? <img src={p.main_image} alt={p.name} className="lp-product-img" />
+                      ? <img src={p.main_image} alt={p.name} className="lp-product-img" loading="eager" />
                       : <div className="lp-product-img-ph"><i className="fa-solid fa-image"></i></div>}
                     {p.discount_percent > 0 && <span className="lp-badge-disc">−{p.discount_percent}%</span>}
                     <div className="lp-product-actions">

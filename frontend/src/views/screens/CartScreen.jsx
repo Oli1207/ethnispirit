@@ -121,7 +121,7 @@ export default function CartScreen() {
       }
       setAppliedPromos((prev) => [...prev, data]);
       setPromoCode('');
-      setAutoApplied('');
+      setPromoError('');
     } catch (err) {
       setPromoError(err.response?.data?.error || 'Code invalide.');
     } finally {
