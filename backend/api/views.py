@@ -531,70 +531,72 @@ def order_payment_verify(request, oid):
     """
     Appelé depuis PaymentSuccessScreen avec session_id.
     Vérifie la Stripe Checkout Session et marque la commande payée si besoin.
-    Compatible avec le flow : Stripe → redirect → frontend → POST ici.
+
+    Architecture : appel Stripe AVANT la transaction DB pour éviter de tenir
+    une connexion PostgreSQL verrouillée pendant une requête réseau externe.
     """
     session_id = request.data.get('session_id')
 
     if not session_id:
         return Response({'error': 'session_id requis.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    # ── 1. Vérifier que la commande existe (lecture seule, pas de verrou) ──────
+    try:
+        order = Order.objects.prefetch_related('items').get(oid=oid)
+    except Order.DoesNotExist:
+        return Response({'error': 'Commande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Déjà payée — retourner immédiatement sans appeler Stripe
+    if order.status == 'paid':
+        return Response(OrderSerializer(order).data)
+
+    # ── 2. Appel Stripe HORS transaction (évite de bloquer la connexion DB) ───
+    try:
+        session = stripe_service.retrieve_session(session_id)
+    except Exception:
+        # Stripe inaccessible : retourner la commande telle quelle.
+        # Le webhook Stripe (ou une nouvelle tentative) mettra à jour le statut.
+        return Response({
+            **OrderSerializer(order).data,
+            '_stripe_pending': True,
+        })
+
+    # ── 3. Vérification anti-fraude ───────────────────────────────────────────
+    if session.metadata.get('order_oid') != order.oid:
+        return Response(
+            {'error': 'Session de paiement invalide pour cette commande.'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    if session.payment_status != 'paid':
+        if session.payment_status == 'unpaid':
+            return Response({
+                **OrderSerializer(order).data,
+                '_stripe_pending': True,
+            })
+        return Response({'error': 'Paiement annulé ou invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ── 4. Mise à jour DB dans une transaction courte (pas d'appel réseau dedans) ──
     with transaction.atomic():
-        try:
-            order = Order.objects.select_for_update().prefetch_related('items').get(oid=oid)
-        except Order.DoesNotExist:
-            return Response({'error': 'Commande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Déjà payée — retourner sans retraiter
+        # Recharger avec verrou pour éviter les doubles mises à jour
+        order = Order.objects.select_for_update().prefetch_related('items').get(oid=oid)
         if order.status == 'paid':
-            serializer = OrderSerializer(order)
-            return Response(serializer.data)
+            # Une autre requête parallèle a déjà traité le paiement
+            return Response(OrderSerializer(order).data)
 
-        try:
-            session = stripe_service.retrieve_session(session_id)
-        except Exception:
-            # Stripe inaccessible ou clé non configurée : retourner la commande telle quelle.
-            # Le webhook Stripe se chargera de marquer le statut 'paid' quand il arrivera.
-            serializer = OrderSerializer(order)
-            return Response({
-                **serializer.data,
-                '_stripe_pending': True,
-            })
+        order.status = 'paid'
+        order.save(update_fields=['status'])
 
-        # ── Vérification anti-fraude : la session doit appartenir à cette commande ──
-        # Sans ce contrôle, un attaquant pourrait réutiliser une session payée d'une
-        # autre commande (même de 0,01 €) pour marquer n'importe quelle commande comme payée.
-        if session.metadata.get('order_oid') != order.oid:
-            return Response(
-                {'error': 'Session de paiement invalide pour cette commande.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        for item in order.items.all():
+            if item.product_id:
+                Product.objects.filter(id=item.product_id).update(
+                    stock=F('stock') - item.quantity
+                )
+                _check_stock_alert(item.product_id)
 
-        if session.payment_status == 'paid':
-            order.status = 'paid'
-            order.save(update_fields=['status'])
-            # ── Décrémente le stock de chaque article ────────────────────────
-            for item in order.items.all():
-                if item.product_id:
-                    Product.objects.filter(id=item.product_id).update(
-                        stock=F('stock') - item.quantity
-                    )
-                    # Alerte stock bas
-                    _check_stock_alert(item.product_id)
-            # ── Email de confirmation post-paiement ───────────────────────────
-            _send_order_confirmation_email(order)
-            serializer = OrderSerializer(order)
-            return Response(serializer.data)
-
-        elif session.payment_status == 'unpaid':
-            # Session créée mais paiement pas encore confirmé (peut arriver en test)
-            serializer = OrderSerializer(order)
-            return Response({
-                **serializer.data,
-                '_stripe_pending': True,
-            })
-
-        else:
-            return Response({'error': 'Paiement annulé ou invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+    # Email et sérialisation hors transaction
+    _send_order_confirmation_email(order)
+    return Response(OrderSerializer(order).data)
 
 
 # ── Avis produit ─────────────────────────────────────────────────────────────
