@@ -562,7 +562,8 @@ def order_payment_verify(request, oid):
         })
 
     # ── 3. Vérification anti-fraude ───────────────────────────────────────────
-    if session.metadata.get('order_oid') != order.oid:
+    # Stripe SDK 8.x : metadata est un StripeObject, pas un dict → utiliser getattr
+    if getattr(session.metadata, 'order_oid', None) != order.oid:
         return Response(
             {'error': 'Session de paiement invalide pour cette commande.'},
             status=status.HTTP_403_FORBIDDEN,
