@@ -144,12 +144,12 @@ GEOIP2_DB_PATH = BASE_DIR / 'GeoLite2-City.mmdb'
 
 
 EMAIL_BACKEND      = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST         = 'mail.ethnispirit.com'
-EMAIL_PORT         = 465
-#EMAIL_USE_SSL      = True
-EMAIL_USE_TLS      = True
-EMAIL_HOST_USER    = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST         = env('EMAIL_HOST',         'mail.ethnispirit.com')
+EMAIL_PORT         = env.int('EMAIL_PORT',      465)
+EMAIL_USE_SSL      = env.bool('EMAIL_USE_SSL',  True)
+EMAIL_USE_TLS      = env.bool('EMAIL_USE_TLS',  False)
+EMAIL_HOST_USER    = env('EMAIL_HOST_USER',    '')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'support@ethnispirit.com'
 EMAIL_TIMEOUT      = 10
 EMAIL_USE_LOCALTIME = True

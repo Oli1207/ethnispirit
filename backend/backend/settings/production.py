@@ -15,9 +15,9 @@ CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
 
 CORS_ALLOW_CREDENTIALS = True
 
-# ── Email LWS (SSL port 465 — remplace le TLS/587 de base.py) ─────────────────
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+# ── Email — valeurs lues depuis .env (EMAIL_HOST, EMAIL_PORT, EMAIL_USE_SSL…) ──
+# Les variables EMAIL_* sont toutes configurables via le fichier .env du serveur.
+# Voir .env.example pour les valeurs recommandées.
 
 # ── Sécurité HTTP ─────────────────────────────────────────────────────────────
 SECURE_BROWSER_XSS_FILTER    = True
