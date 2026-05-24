@@ -410,7 +410,7 @@ function ProductModal({ product, categories, onClose, onSaved }) {
               <select className="form-select eth-input" value={form.category} onChange={e => set('category', e.target.value)}>
                 <option value="">— Choisir —</option>
                 {['mode', 'bio'].map(u => (
-                  <optgroup key={u} label={u === 'mode' ? 'Mode Antillaise' : 'Bio & Naturel'}>
+                  <optgroup key={u} label={u === 'mode' ? 'Mode Caribéenne' : 'Bio & Naturel'}>
                     {categories.filter(c => c.universe === u).map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}

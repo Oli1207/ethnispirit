@@ -58,7 +58,7 @@ export default function BioFooter() {
             <li><Link to="/bio/catalogue">Produits Bio</Link></li>
             <li>
               <Link to="/" className="bio-footer-mode-link">
-                <i className="fa-solid fa-shirt me-1"></i>Mode Antillaise
+                <i className="fa-solid fa-shirt me-1"></i>Mode Caribéenne
               </Link>
             </li>
           </ul>

@@ -93,7 +93,7 @@ export default function CartScreen() {
     if (newUniverse === 'all' && appliedPromos.length > 0)
       return { ok: false, error: 'Le code universel ne peut pas se combiner avec un autre code.' };
     if (appliedPromos.some((p) => p.universe === newUniverse)) {
-      const label = newUniverse === 'mode' ? 'Mode Antillaise' : 'Bio & Naturel';
+      const label = newUniverse === 'mode' ? 'Mode Caribéenne' : 'Bio & Naturel';
       return { ok: false, error: `Un code ${label} est déjà appliqué.` };
     }
     return { ok: true };
@@ -174,7 +174,7 @@ export default function CartScreen() {
 
   return (
     <div style={{ background: 'var(--cream)' }}>
-      <SEO title="Mon Panier" description="Finalisez votre commande EthniSpirit — mode antillaise et bio naturel." noindex={true} />
+      <SEO title="Mon Panier" description="Finalisez votre commande EthniSpirit — mode caribéenne et bio naturel." noindex={true} />
       <MobileBackButton to="/catalogue" label="Continuer mes achats" />
 
       {/* ── Header ───────────────────────────────────────────────────── */}

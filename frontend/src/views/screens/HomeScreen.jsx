@@ -6,7 +6,7 @@ import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
 import heroBg from '../../assets/hero_bg.png';
 
-// ── Images Mode — femme antillaise, mode africaine, bijoux ────────────────────
+// ── Images Mode — femme caribéenne, mode africaine, bijoux ───────────────────
 const HERO_IMG  = heroBg;
 const HERO_IMG2 = 'https://images.unsplash.com/photo-1664151099399-d41ed991a10d?w=700&q=85'; // robe africaine wax print
 const HERO_IMG3 = 'https://images.unsplash.com/photo-1579624054375-72037da740e5?w=700&q=85'; // collier perles africain
@@ -14,14 +14,14 @@ const STORY_IMG = 'https://images.unsplash.com/photo-1768212565424-efa3a3852b81?
 
 const MARQUEE_ITEMS = [
   'Artisanat Ivoirien', 'Livraison Caraïbes', 'Fait avec Amour',
-  'Mode Authentique', 'Pièces Uniques', 'Femme Antillaise',
+  'Mode Authentique', 'Pièces Uniques', 'Femme Caribéenne',
   'Elegance Africaine', 'Certifié Naturel', 'Collection 2025',
 ];
 
 const TESTIMONIALS = [
   { name: 'Amenan K.', island: 'Martinique', stars: 5, text: 'Des pièces sublimes, vraiment uniques. Je reçois des compliments à chaque fois que je porte ma robe. Qualité exceptionnelle.' },
   { name: 'Emmanuella N.', island: 'Guadeloupe', stars: 5, text: 'Livraison rapide et emballage soigné. Les bijoux sont magnifiques, exactement comme sur les photos. Je recommande !' },
-  { name: 'Anne V.', island: 'Martinique', stars: 5, text: 'Enfin une boutique qui comprend le style antillais avec une touche africaine. Je suis fan, je commande régulièrement.' },
+  { name: 'Anne V.', island: 'Martinique', stars: 5, text: 'Enfin une boutique qui comprend le style caribéen avec une touche africaine. Je suis fan, je commande régulièrement.' },
 ];
 
 function Stars({ n = 5 }) {
@@ -76,7 +76,7 @@ export default function HomeScreen() {
     <>
       <SEO
         title={null}
-        description="Mode antillaise authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM."
+        description="Mode caribéenne authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM."
         isHome={true}
       />
 
@@ -104,7 +104,7 @@ export default function HomeScreen() {
             </h1>
             <p className="lp-hero-desc">
               Bijoux, tenues et accessoires d'origine ivoirienne,<br className="d-none d-lg-block" />
-              soigneusement sélectionnés pour la femme antillaise.
+              soigneusement sélectionnés pour la femme caribéenne.
             </p>
             <div className="lp-hero-actions">
               <Link to="/catalogue" className="lp-btn-main">
@@ -298,7 +298,7 @@ export default function HomeScreen() {
               Chaque pièce raconte<br /><em>une histoire</em>
             </h2>
             <p className="lp-story-text">
-              EthniSpirit est né d'un amour profond pour l'artisanat africain et la culture antillaise.
+              EthniSpirit est né d'un amour profond pour l'artisanat africain et la culture caribéenne.
               Chaque bijou, chaque tenue est choisi directement auprès d'artisans ivoiriens,
               pour apporter un peu de leur âme à la femme caribéenne.
             </p>
@@ -386,7 +386,7 @@ export default function HomeScreen() {
             </h2>
             <p className="lp-bio-desc">
               Soins, huiles essentielles, tisanes et produits alimentaires bio
-              d'origine tropicale. La nature antillaise, en bouteille.
+              d'origine tropicale. La nature caribéenne, en bouteille.
             </p>
             <div className="lp-bio-feats">
               {['100% Naturel', 'Certifié Bio', 'Commerce équitable'].map(f => (

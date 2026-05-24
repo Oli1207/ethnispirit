@@ -68,7 +68,7 @@ export default function BioCatalogueScreen() {
     <div className="bio-catalogue-page">
       <SEO
         title="Catalogue Bio & Naturel"
-        description="Soins naturels, huiles essentielles, tisanes et cosmétiques bio antillais. Certifié naturel, sans additifs. Livraison en Martinique, Guadeloupe et DOM-TOM."
+        description="Soins naturels, huiles essentielles, tisanes et cosmétiques bio caribéens. Certifié naturel, sans additifs. Livraison en Martinique, Guadeloupe et DOM-TOM."
         breadcrumbs={[{ name: 'Accueil Bio', url: '/bio' }, { name: 'Catalogue Bio', url: '/bio/catalogue' }]}
       />
       <MobileBackButton to="/bio" label="Accueil Bio" />

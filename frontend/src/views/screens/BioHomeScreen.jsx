@@ -389,7 +389,7 @@ export default function BioHomeScreen() {
             </h2>
             <p className="blp-mode-desc">
               Bijoux, tenues et accessoires d'origine ivoirienne,
-              soigneusement sélectionnés pour la femme antillaise.
+              soigneusement sélectionnés pour la femme caribéenne.
             </p>
             <div className="blp-mode-feats">
               {['Artisanat Ivoirien', 'Pièces Uniques', 'Livraison Caraïbes'].map(f => (

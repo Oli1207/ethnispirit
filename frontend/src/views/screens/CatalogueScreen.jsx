@@ -72,8 +72,8 @@ export default function CatalogueScreen() {
   return (
     <div className="eth-catalogue-page">
       <SEO
-        title={catLabel ? `${catLabel} — Mode Antillaise` : 'Catalogue Mode Antillaise'}
-        description="Découvrez notre collection de bijoux, vêtements et accessoires antillais et africains. Pièces uniques, artisanat authentique, livraison en DOM-TOM."
+        title={catLabel ? `${catLabel} — Mode Caribéenne` : 'Catalogue Mode Caribéenne'}
+        description="Découvrez notre collection de bijoux, vêtements et accessoires caribéens et africains. Pièces uniques, artisanat authentique, livraison en DOM-TOM."
         breadcrumbs={[
           { name: 'Accueil', url: '/' },
           { name: 'Catalogue', url: '/catalogue' },
@@ -86,7 +86,7 @@ export default function CatalogueScreen() {
       <div className="eth-catalogue-header">
         <div className="eth-catalogue-header-inner">
           <div>
-            <p className="eth-section-label">Mode Antillaise</p>
+            <p className="eth-section-label">Mode Caribéenne</p>
             <h1 className="eth-section-title">Notre <em>Catalogue</em></h1>
             <p className="eth-section-sub mt-2">
               {products.length > 0 ? `${products.length} article${products.length > 1 ? 's' : ''} disponibles` : 'Découvrez tous nos produits'}

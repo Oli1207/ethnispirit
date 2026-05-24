@@ -40,7 +40,7 @@ export default function BioNavbar() {
         </div>
         <Link to="/" className="bio-back-mode ms-auto">
           <i className="fa-solid fa-shirt"></i>
-          Mode Antillaise
+          Mode Caribéenne
         </Link>
       </div>
 
@@ -75,7 +75,7 @@ export default function BioNavbar() {
           <li className="bio-mode-nav-pill">
             <Link to="/">
               <i className="fa-solid fa-shirt"></i>
-              Mode Antillaise
+              Mode Caribéenne
             </Link>
           </li>
         </ul>
@@ -120,7 +120,7 @@ export default function BioNavbar() {
             <li><NavLink to="/bio/a-propos" onClick={() => setMenuOpen(false)}>À propos</NavLink></li>
             <li>
               <Link to="/" onClick={() => setMenuOpen(false)} className="bio-mobile-mode-pill">
-                <i className="fa-solid fa-shirt me-2"></i>Mode Antillaise
+                <i className="fa-solid fa-shirt me-2"></i>Mode Caribéenne
               </Link>
             </li>
           </ul>

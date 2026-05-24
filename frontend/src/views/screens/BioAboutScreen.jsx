@@ -110,7 +110,7 @@ export default function BioAboutScreen() {
               <i className="fa-solid fa-arrow-right me-2"></i>Voir les produits Bio
             </Link>
             <Link to="/" className="bio-btn-ghost">
-              <i className="fa-solid fa-shirt me-2"></i>Mode Antillaise
+              <i className="fa-solid fa-shirt me-2"></i>Mode Caribéenne
             </Link>
           </div>
         </div>

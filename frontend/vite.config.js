@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
-        name: 'EthniSpirit — Mode & Bio Antillais',
+        name: 'EthniSpirit — Mode & Bio Caribéens',
         short_name: 'EthniSpirit',
-        description: 'Mode antillaise authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM.',
+        description: 'Mode caribéenne authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM.',
         theme_color: '#7b3225',
         background_color: '#faf7f2',
         display: 'standalone',
@@ -42,9 +42,9 @@ export default defineConfig({
         categories: ['shopping', 'lifestyle'],
         shortcuts: [
           {
-            name: 'Mode Antillaise',
+            name: 'Mode Caribéenne',
             url: '/catalogue',
-            description: 'Bijoux, vêtements et accessoires antillais',
+            description: 'Bijoux, vêtements et accessoires caribéens',
           },
           {
             name: 'Bio & Naturel',

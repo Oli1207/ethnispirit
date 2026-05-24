@@ -90,7 +90,7 @@ BIJOUX_PRODUCTS = [
         "description": (
             "Collier long satoir à chaîne dorée avec un grand pendentif feuille tropicale "
             "pavé de zirconiums blancs et d'émeraudes synthétiques. Inspiré de la végétation "
-            "luxuriante des Antilles et de l'Afrique équatoriale. "
+            "luxuriante des Caraïbes et de l'Afrique équatoriale. "
             "Longueur chaîne : 70 cm, pendentif : 6 cm."
         ),
         "origin": "Caraïbes",

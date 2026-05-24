@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             name='Category',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('universe', models.CharField(choices=[('mode', 'Mode Antillaise'), ('bio', 'Bio & Naturel')], default='mode', max_length=10)),
+                ('universe', models.CharField(choices=[('mode', 'Mode Caribéenne'), ('bio', 'Bio & Naturel')], default='mode', max_length=10)),
                 ('name', models.CharField(max_length=100)),
                 ('slug', models.SlugField(blank=True, max_length=120, unique=True)),
                 ('description', models.TextField(blank=True)),
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.EmailField(max_length=254, unique=True)),
-                ('universe', models.CharField(choices=[('mode', 'Mode Antillaise'), ('bio', 'Bio & Naturel')], default='mode', max_length=10)),
+                ('universe', models.CharField(choices=[('mode', 'Mode Caribéenne'), ('bio', 'Bio & Naturel')], default='mode', max_length=10)),
                 ('is_active', models.BooleanField(default=True)),
                 ('date', models.DateTimeField(auto_now_add=True)),
             ],

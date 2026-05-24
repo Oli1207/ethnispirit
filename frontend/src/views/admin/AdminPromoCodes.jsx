@@ -10,7 +10,7 @@ const EMPTY = {
 
 const UNIVERSE_LABELS = {
   all:  { label: 'Tous les univers', color: 'var(--text-mid)',    bg: 'var(--cream)' },
-  mode: { label: 'Mode Antillaise',  color: 'var(--tc-classic)',  bg: 'rgba(198,93,59,.1)' },
+  mode: { label: 'Mode Caribéenne',  color: 'var(--tc-classic)',  bg: 'rgba(198,93,59,.1)' },
   bio:  { label: 'Bio & Naturel',    color: 'var(--bio-main)',    bg: 'rgba(45,90,46,.1)' },
 };
 
@@ -130,12 +130,12 @@ function PromoModal({ promo, onClose, onSaved }) {
             <label style={labelStyle}>Univers d'application</label>
             <select style={inputStyle} value={form.universe} onChange={(e) => set('universe', e.target.value)}>
               <option value="all">Tous les univers</option>
-              <option value="mode">Mode Antillaise uniquement</option>
+              <option value="mode">Mode Caribéenne uniquement</option>
               <option value="bio">Bio & Naturel uniquement</option>
             </select>
             <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4, marginBottom: 0 }}>
               {form.universe === 'all'  && 'S\'applique sur le total de la commande (Mode + Bio).'}
-              {form.universe === 'mode' && 'Ne réduit que les articles Mode Antillaise. Cumulable avec un code Bio.'}
+              {form.universe === 'mode' && 'Ne réduit que les articles Mode Caribéenne. Cumulable avec un code Bio.'}
               {form.universe === 'bio'  && 'Ne réduit que les articles Bio & Naturel. Cumulable avec un code Mode.'}
             </p>
           </div>
@@ -291,7 +291,7 @@ function WelcomeModalEditor() {
           <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: 4 }}>Affiché sur</label>
           <select style={inp} value={form.universe} onChange={e => set('universe', e.target.value)}>
             <option value="all">Tous les univers</option>
-            <option value="mode">Mode Antillaise uniquement</option>
+            <option value="mode">Mode Caribéenne uniquement</option>
             <option value="bio">Bio & Naturel uniquement</option>
           </select>
         </div>

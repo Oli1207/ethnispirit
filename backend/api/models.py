@@ -10,7 +10,7 @@ from userauths.models import User
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 UNIVERSE_CHOICES = [
-    ('mode', 'Mode Antillaise'),
+    ('mode', 'Mode Caribéenne'),
     ('bio',  'Bio & Naturel'),
 ]
 
@@ -142,7 +142,7 @@ class PromoCode(models.Model):
         ('fixed',   'Montant fixe'),
     ]
     UNIVERSE_CHOICES = [
-        ('mode', 'Mode Antillaise uniquement'),
+        ('mode', 'Mode Caribéenne uniquement'),
         ('bio',  'Bio & Naturel uniquement'),
         ('all',  'Tous les univers'),
     ]
@@ -462,7 +462,7 @@ class WelcomePromoSettings(models.Model):
     """
     UNIVERSE_CHOICES = [
         ('all',  'Tous les univers'),
-        ('mode', 'Mode Antillaise'),
+        ('mode', 'Mode Caribéenne'),
         ('bio',  'Bio & Naturel'),
     ]
     is_active     = models.BooleanField(default=True, verbose_name='Actif')

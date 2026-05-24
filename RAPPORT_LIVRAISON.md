@@ -9,11 +9,11 @@ Ce document présente l'ensemble des fonctionnalités développées pour la plat
 
 ---
 
-## 1. Double univers — Mode Antillaise & Bio & Naturel
+## 1. Double univers — Mode Caribéenne & Bio & Naturel
 
 **Ce qui a été fait :** Le site est structuré en deux univers distincts avec chacun sa propre identité visuelle, sa palette de couleurs, sa navigation et son catalogue.
 
-- **Mode Antillaise** (`/`, `/catalogue`) — tons terracotta, fil rouge dans toute l'interface
+- **Mode Caribéenne** (`/`, `/catalogue`) — tons terracotta, fil rouge dans toute l'interface
 - **Bio & Naturel** (`/bio`, `/bio/catalogue`) — tons verts, ambiance naturelle et apaisante
 
 Les deux univers partagent le même moteur (panier, compte client, checkout, commandes) mais s'affichent de façon totalement indépendante.

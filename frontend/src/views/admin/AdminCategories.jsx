@@ -96,7 +96,7 @@ function CategoryModal({ category, onClose, onSaved }) {
             <label className="eth-form-label">Univers *</label>
             <div style={{ display: 'flex', gap: 10 }}>
               {[
-                { val: 'mode', label: 'Mode Antillaise', color: 'var(--tc-classic)', bg: 'rgba(198,93,59,.1)' },
+                { val: 'mode', label: 'Mode Caribéenne', color: 'var(--tc-classic)', bg: 'rgba(198,93,59,.1)' },
                 { val: 'bio',  label: 'Bio & Naturel',   color: 'var(--bio-main)',   bg: 'rgba(45,90,46,.1)'  },
               ].map(opt => (
                 <button

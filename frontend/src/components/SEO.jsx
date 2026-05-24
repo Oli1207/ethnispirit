@@ -20,7 +20,7 @@ import { useLocation } from 'react-router-dom';
 const SITE_NAME   = 'EthniSpirit';
 const SITE_URL    = import.meta.env.VITE_SITE_URL || 'https://ethnispirit.com';
 const DEFAULT_IMG = `${SITE_URL}/icons/og-default.png`;
-const DEFAULT_DESC = 'Mode antillaise authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM.';
+const DEFAULT_DESC = 'Mode caribéenne authentique & cosmétiques bio naturels. Bijoux, vêtements, soins — livraison en Martinique, Guadeloupe et DOM-TOM.';
 
 export default function SEO({
   title,
@@ -38,7 +38,7 @@ export default function SEO({
     ? (image.startsWith('http') ? image : `${SITE_URL}${image}`)
     : DEFAULT_IMG;
 
-  const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — Mode Antillaise & Bio Naturel`;
+  const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — Mode Caribéenne & Bio Naturel`;
 
   // ── JSON-LD : WebSite + SearchAction (homepage) ───────────────────────────
   const websiteSchema = isHome ? {

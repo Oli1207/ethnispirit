@@ -7,7 +7,7 @@ export default function AboutScreen() {
     <div>
       <SEO
         title="À propos"
-        description="L'histoire d'EthniSpirit — une boutique dédiée à la mode antillaise authentique et aux cosmétiques bio naturels, née d'un amour pour la culture créole et africaine."
+        description="L'histoire d'EthniSpirit — une boutique dédiée à la mode caribéenne authentique et aux cosmétiques bio naturels, née d'un amour pour la culture créole et africaine."
       />
       <MobileBackButton to="/" label="Accueil" />
       {/* ── Hero ─────────────────────────────────────────────────────── */}
@@ -21,7 +21,7 @@ export default function AboutScreen() {
             <p className="eth-about-lead">
               EthniSpirit est née d'une passion pour le savoir-faire africain et
               d'une volonté de partager cette richesse culturelle avec les
-              communautés antillaises de Martinique et Guadeloupe.
+              communautés caribéennes de Martinique et Guadeloupe.
             </p>
             <div style={{ display: 'flex', gap: 14, marginTop: 32, flexWrap: 'wrap' }}>
               <Link to="/catalogue" className="btn-hero-main">

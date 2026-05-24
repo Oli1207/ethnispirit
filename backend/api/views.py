@@ -218,7 +218,7 @@ def promo_check(request):
     if promo.universe == 'mode':
         if mode_subtotal == 0:
             return Response(
-                {'error': 'Ce code s\'applique uniquement aux articles Mode Antillaise.'},
+                {'error': 'Ce code s\'applique uniquement aux articles Mode Caribéenne.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         applicable = mode_subtotal
@@ -1534,7 +1534,7 @@ def sitemap_xml(request):
 
     for p in products:
         lastmod = p.date.strftime('%Y-%m-%d') if p.date else ''
-        # Mode antillaise
+        # Mode caribéenne
         lines.append(f'''  <url>
     <loc>{site_url}/produit/{p.slug}</loc>
     <lastmod>{lastmod}</lastmod>

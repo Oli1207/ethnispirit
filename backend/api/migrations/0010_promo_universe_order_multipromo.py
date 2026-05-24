@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='universe',
             field=models.CharField(
                 choices=[
-                    ('mode', 'Mode Antillaise uniquement'),
+                    ('mode', 'Mode Caribéenne uniquement'),
                     ('bio',  'Bio & Naturel uniquement'),
                     ('all',  'Tous les univers'),
                 ],

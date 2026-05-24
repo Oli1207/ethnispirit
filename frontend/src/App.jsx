@@ -123,7 +123,7 @@ export default function App() {
     <BrowserRouter>
       <PageTracker />
       <Routes>
-        {/* ── Mode Antillaise ─────────────────────────────────────────────── */}
+        {/* ── Mode Caribéenne ─────────────────────────────────────────────── */}
         <Route element={<ModeLayout />}>
           <Route path="/"                index element={<HomeScreen />} />
           <Route path="/catalogue"       element={<CatalogueScreen />} />
