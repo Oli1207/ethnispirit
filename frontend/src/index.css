@@ -1466,8 +1466,8 @@ a { text-decoration: none; color: inherit; }
 
   /* Account → stack */
   .eth-account-layout { grid-template-columns: 1fr; }
-  .eth-account-sidebar { position: static; flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 4px; }
-  .eth-account-tab { min-width: 140px; flex-shrink: 0; }
+  .eth-account-sidebar { position: static; flex-direction: column; gap: 10px; }
+  .eth-account-tab { min-width: 130px; flex-shrink: 0; }
 
   /* Auth */
   .eth-auth-page { grid-template-columns: 1fr; min-height: 100svh; }
@@ -2447,8 +2447,16 @@ a { text-decoration: none; color: inherit; }
 
 @media (max-width: 768px) {
   .eth-account-layout { grid-template-columns: 1fr; }
-  .eth-account-sidebar { position: static; flex-direction: row; overflow-x: auto; gap: 8px; }
-  .eth-account-tab { min-width: 140px; }
+  /* Sidebar : user card en haut, tabs en scroll horizontal en dessous */
+  .eth-account-sidebar { position: static; flex-direction: column; gap: 10px; }
+  .eth-account-nav {
+    display: flex; flex-direction: row;
+    overflow-x: auto; gap: 6px; padding-bottom: 4px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .eth-account-nav::-webkit-scrollbar { display: none; }
+  .eth-account-tab { min-width: 130px; flex-shrink: 0; font-size: 13px; padding: 10px 12px; }
+  .eth-account-panel { padding: 20px 16px; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5801,8 +5809,13 @@ a { text-decoration: none; color: inherit; }
   .eth-checkout-layout { gap: 16px; }
 
   /* ── Admin ─────────────────────────────────────────────────────────── */
-  .eth-admin-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .eth-admin-stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
   .eth-admin-shortcuts-grid { grid-template-columns: 1fr; }
+  /* Stat cards : padding + taille réduits pour tenir en 2 colonnes */
+  .eth-stat-card { padding: 14px 10px; gap: 10px; }
+  .eth-stat-icon-wrap { width: 40px; height: 40px; font-size: 16px; flex-shrink: 0; }
+  .eth-stat-value { font-size: 18px; }
+  .eth-stat-label { font-size: 10px; }
 
   /* ── Footer ────────────────────────────────────────────────────────── */
   .eth-footer, .bio-footer { padding-bottom: max(32px, env(safe-area-inset-bottom)); }

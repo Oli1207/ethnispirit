@@ -62,6 +62,15 @@ import OrderTrackingScreen    from './views/screens/OrderTrackingScreen';
 import ProductRequestPage     from './views/screens/ProductRequestPage';
 
 
+// ── Scroll en haut à chaque changement de route ───────────────────────────────
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 // ── Tracker de pages vues ─────────────────────────────────────────────────────
 function PageTracker() {
   const location = useLocation();
@@ -121,6 +130,7 @@ export default function App() {
   return (
     <HelmetProvider>
     <BrowserRouter>
+      <ScrollToTop />
       <PageTracker />
       <Routes>
         {/* ── Mode Caribéenne ─────────────────────────────────────────────── */}
