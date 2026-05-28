@@ -19,6 +19,7 @@ export default function CatalogueScreen() {
   const [sortBy, setSortBy]               = useState('');
   const [inStockOnly, setInStockOnly]     = useState(false);
   const [activeCert, setActiveCert]       = useState('');
+  const [filtersOpen, setFiltersOpen]     = useState(false);
 
   useEffect(() => {
     categoriesAPI.list('mode')
@@ -102,25 +103,43 @@ export default function CatalogueScreen() {
       </div>
 
       {/* ── Filters ────────────────────────────────────────────────────── */}
-      <div className="eth-catalogue-filters-bar">
+      <div className={`eth-catalogue-filters-bar${filtersOpen ? ' filters-open' : ''}`}>
         <div className="eth-catalogue-filters-inner">
-          <div className="eth-filters-chips">
-            <button
-              className={`eth-filter-btn ${!activeCategory ? 'active' : ''}`}
-              onClick={() => handleCategoryClick('')}
-            >
-              Tous
-            </button>
-            {categories.map((cat) => (
+
+          {/* Ligne 1 : catégories (scrollable) + bouton toggle mobile */}
+          <div className="eth-filters-chips-row">
+            <div className="eth-filters-chips">
               <button
-                key={cat.id}
-                className={`eth-filter-btn ${activeCategory === cat.slug ? 'active' : ''}`}
-                onClick={() => handleCategoryClick(cat.slug)}
+                className={`eth-filter-btn ${!activeCategory ? 'active' : ''}`}
+                onClick={() => handleCategoryClick('')}
               >
-                {cat.name}
+                Tous
               </button>
-            ))}
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  className={`eth-filter-btn ${activeCategory === cat.slug ? 'active' : ''}`}
+                  onClick={() => handleCategoryClick(cat.slug)}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Bouton toggle — visible uniquement sur mobile */}
+            <button
+              className={`eth-filters-toggle-btn${filtersOpen ? ' open' : ''}`}
+              onClick={() => setFiltersOpen((o) => !o)}
+              aria-expanded={filtersOpen}
+              aria-label="Afficher les filtres"
+            >
+              <i className="fa-solid fa-sliders"></i>
+              <span>Filtres</span>
+              {hasActiveFilters && <span className="eth-filters-dot"></span>}
+            </button>
           </div>
+
+          {/* Recherche */}
           <form className="eth-search-form" onSubmit={handleSearchSubmit}>
             <input
               type="search"
@@ -133,7 +152,8 @@ export default function CatalogueScreen() {
             </button>
           </form>
         </div>
-        {/* ── Barre de filtres secondaires ────────────────────────────── */}
+
+        {/* ── Filtres secondaires ──────────────────────────────────── */}
         <div className="eth-secondary-filters">
           <select
             className="eth-filter-select"
