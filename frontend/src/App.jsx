@@ -52,6 +52,7 @@ import AdminPromoCodes   from './views/admin/AdminPromoCodes';
 import AdminContacts         from './views/admin/AdminContacts';
 import AdminAnalytics        from './views/admin/AdminAnalytics';
 import AdminProductRequests  from './views/admin/AdminProductRequests';
+import AdminTeam            from './views/admin/AdminTeam';
 
 import OrderConfirmedScreen  from './views/screens/OrderConfirmedScreen';
 import WishlistScreen         from './views/screens/WishlistScreen';
@@ -197,6 +198,9 @@ export default function App() {
           } />
           <Route path="/admin-dashboard/demandes-produits" element={
             <AdminRoute><AdminProductRequests /></AdminRoute>
+          } />
+          <Route path="/admin-dashboard/equipe" element={
+            <AdminRoute><AdminTeam /></AdminRoute>
           } />
         </Route>
 

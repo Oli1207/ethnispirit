@@ -13,6 +13,7 @@ from .models import (
     Cart, CartItem, Order, OrderItem, NewsletterSubscriber, ProductReview, ShippingZone,
     ContactMessage, AnalyticsSession, AnalyticsEvent, WelcomePromoSettings,
     StockAlertSettings, RestockNotification, ProductRequest,
+    StaffProfile, PushSubscription, ROLE_DEFAULT_PERMISSIONS,
 )
 from .serializers import (
     CategorySerializer, CategoryWriteSerializer,
@@ -517,6 +518,18 @@ def order_create(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
+    # Push notification — nouvelle commande en attente de paiement
+    try:
+        from .push_utils import send_push_to_staff
+        send_push_to_staff(
+            title='🛒 Nouvelle commande',
+            body=f'{order.oid} — {order.full_name} — {order.total} €',
+            url='/admin-dashboard/commandes',
+            event_type='new_order',
+        )
+    except Exception:
+        pass
+
     return Response({
         'oid':             order.oid,
         'total':           str(order.total),
@@ -599,6 +612,23 @@ def order_payment_verify(request, oid):
 
     # Email et sérialisation hors transaction
     _send_order_confirmation_email(order)
+    # Push notification — paiement confirmé
+    try:
+        from .push_utils import send_push_to_staff
+        universe = None
+        if order.promo_code_mode and not order.promo_code_bio:
+            universe = 'mode'
+        elif order.promo_code_bio and not order.promo_code_mode:
+            universe = 'bio'
+        send_push_to_staff(
+            title='💳 Paiement confirmé',
+            body=f'Commande {order.oid} payée — {order.full_name} — {order.total} €',
+            url=f'/admin-dashboard/commandes',
+            universe=universe,
+            event_type='payment_confirmed',
+        )
+    except Exception:
+        pass
     return Response(OrderSerializer(order).data)
 
 
@@ -721,6 +751,18 @@ def contact_send(request):
     except Exception:
         pass
 
+    # Push notification — nouveau message de contact
+    try:
+        from .push_utils import send_push_to_staff
+        send_push_to_staff(
+            title='✉️ Nouveau message de contact',
+            body=f'{name} — {subject}',
+            url='/admin-dashboard/contacts',
+            event_type='new_contact',
+        )
+    except Exception:
+        pass
+
     return Response({'message': 'Message envoyé avec succès.'}, status=status.HTTP_201_CREATED)
 
 
@@ -817,6 +859,18 @@ def product_request_create(request):
             )
         except Exception:
             pass
+
+    # Push notification — nouvelle demande de produit
+    try:
+        from .push_utils import send_push_to_staff
+        send_push_to_staff(
+            title='📦 Nouvelle demande de produit',
+            body=f'{name or "Anonyme"} — {description[:60]}…' if len(description) > 60 else f'{name or "Anonyme"} — {description}',
+            url='/admin-dashboard/demandes-produits',
+            event_type='new_product_request',
+        )
+    except Exception:
+        pass
 
     return Response({'message': 'Demande envoyée avec succès.'}, status=status.HTTP_201_CREATED)
 
@@ -1613,6 +1667,28 @@ def _check_stock_alert(product_id):
             return
         product = Product.objects.get(id=product_id)
         if product.stock < alert_settings.threshold:
+            # Push notification stock bas (et rupture si = 0)
+            try:
+                from .push_utils import send_push_to_staff
+                universe = product.category.universe if product.category else None
+                if product.stock == 0:
+                    send_push_to_staff(
+                        title='🚨 Rupture de stock',
+                        body=f'{product.name} — stock épuisé',
+                        url='/admin-dashboard/produits',
+                        universe=universe,
+                        event_type='out_of_stock',
+                    )
+                else:
+                    send_push_to_staff(
+                        title='⚠️ Stock bas',
+                        body=f'{product.name} — {product.stock} unité(s) restante(s)',
+                        url='/admin-dashboard/produits',
+                        universe=universe,
+                        event_type='low_stock',
+                    )
+            except Exception:
+                pass
             send_mail(
                 subject=f'[EthniSpirit] Alerte stock bas — {product.name}',
                 message=(
@@ -1986,3 +2062,255 @@ def cart_update_email(request):
     cart.save(update_fields=['email', 'checkout_started_at'])
 
     return Response({'message': 'Email enregistré.'})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAFF RBAC
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _is_superuser(request):
+    return request.user and request.user.is_authenticated and request.user.is_superuser
+
+
+def _staff_profile_to_dict(profile, request=None):
+    """Sérialise un StaffProfile + User pour les réponses API."""
+    from userauths.models import User
+    u = profile.user
+    return {
+        'id':                 profile.id,
+        'user_id':            u.id,
+        'email':              u.email,
+        'full_name':          u.full_name,
+        'role':               profile.role,
+        'role_label':         profile.get_role_display(),
+        'extra_permissions':  profile.extra_permissions,
+        'effective_permissions': profile.get_effective_permissions(),
+        'notify_universes':   profile.notify_universes,
+        'is_active':          profile.is_active,
+        'date_created':       profile.date_created,
+    }
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_staff_list(request):
+    """
+    GET /api/admin/staff/
+    Liste tous les membres du staff (superuser requis pour voir).
+    """
+    profiles = StaffProfile.objects.select_related('user').order_by('-date_created')
+    data = [_staff_profile_to_dict(p) for p in profiles]
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_staff_create(request):
+    """
+    POST /api/admin/staff/
+    Crée un compte staff (superuser requis).
+    Body: { email, full_name, password, role, extra_permissions?, notify_universes? }
+    """
+    if not _is_superuser(request):
+        return Response({'error': 'Accès refusé — superuser requis.'}, status=status.HTTP_403_FORBIDDEN)
+
+    from django.contrib.auth.password_validation import validate_password
+    from django.core.exceptions import ValidationError as DjValidationError
+    from userauths.models import User
+
+    email      = request.data.get('email', '').strip().lower()
+    full_name  = request.data.get('full_name', '').strip()
+    password   = request.data.get('password', '').strip()
+    role       = request.data.get('role', 'support')
+    extra_perm = request.data.get('extra_permissions', {})
+    notify_u   = request.data.get('notify_universes', [])
+
+    if not email or not password:
+        return Response({'error': 'email et password requis.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if role not in dict(StaffProfile._meta.get_field('role').choices):
+        return Response({'error': f'Rôle invalide. Valeurs acceptées : delivery, catalog, support, accounting, superadmin.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Un utilisateur avec cet email existe déjà.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        validate_password(password)
+    except DjValidationError as e:
+        return Response({'error': list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+
+    import secrets as _s
+    base_username = email.split('@')[0][:20]
+    username = f"{base_username}_{_s.token_hex(3)}"
+
+    user = User.objects.create_user(
+        email     = email,
+        username  = username,
+        full_name = full_name,
+        password  = password,
+        is_staff  = True,
+    )
+
+    profile = StaffProfile.objects.create(
+        user              = user,
+        role              = role,
+        extra_permissions = extra_perm if isinstance(extra_perm, dict) else {},
+        notify_universes  = notify_u if isinstance(notify_u, list) else [],
+        created_by        = request.user,
+        is_active         = True,
+    )
+
+    # Email de bienvenue
+    try:
+        from django.conf import settings as dj_settings
+        from django.core.mail import send_mail
+        from_email = dj_settings.DEFAULT_FROM_EMAIL
+        frontend_url = getattr(dj_settings, 'FRONTEND_URL', 'https://ethnispirit.com')
+        send_mail(
+            subject='Votre accès EthniSpirit — Espace Administration',
+            message=(
+                f"Bonjour {full_name or email},\n\n"
+                f"Un accès à l'administration EthniSpirit vous a été attribué.\n\n"
+                f"Identifiants :\n"
+                f"  Email      : {email}\n"
+                f"  Mot de passe : {password}\n"
+                f"  Rôle       : {profile.get_role_display()}\n\n"
+                f"Connexion : {frontend_url}/login\n\n"
+                f"Pensez à changer votre mot de passe après votre première connexion.\n\n"
+                f"— L'équipe EthniSpirit"
+            ),
+            from_email=from_email,
+            recipient_list=[email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+    return Response(_staff_profile_to_dict(profile), status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_staff_detail(request, staff_id):
+    """
+    PATCH /api/admin/staff/<id>/  — met à jour rôle, permissions, univers, is_active
+    DELETE /api/admin/staff/<id>/ — désactive (soft delete) le compte staff
+    """
+    if not _is_superuser(request):
+        return Response({'error': 'Accès refusé — superuser requis.'}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        profile = StaffProfile.objects.select_related('user').get(id=staff_id)
+    except StaffProfile.DoesNotExist:
+        return Response({'error': 'Membre staff introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'DELETE':
+        # Soft delete : désactiver le compte + retirer is_staff
+        profile.is_active = False
+        profile.save(update_fields=['is_active'])
+        profile.user.is_staff = False
+        profile.user.save(update_fields=['is_staff'])
+        return Response({'message': 'Compte désactivé.'})
+
+    # PATCH
+    data = request.data
+    if 'role' in data:
+        role = data['role']
+        if role not in dict(StaffProfile._meta.get_field('role').choices):
+            return Response({'error': 'Rôle invalide.'}, status=status.HTTP_400_BAD_REQUEST)
+        profile.role = role
+    if 'extra_permissions' in data:
+        profile.extra_permissions = data['extra_permissions'] if isinstance(data['extra_permissions'], dict) else {}
+    if 'notify_universes' in data:
+        profile.notify_universes = data['notify_universes'] if isinstance(data['notify_universes'], list) else []
+    if 'is_active' in data:
+        val = data['is_active']
+        is_active = val if isinstance(val, bool) else str(val).lower() == 'true'
+        profile.is_active = is_active
+        profile.user.is_staff = is_active
+        profile.user.save(update_fields=['is_staff'])
+    if 'password' in data and data['password']:
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjValidationError
+        try:
+            validate_password(data['password'])
+        except DjValidationError as e:
+            return Response({'error': list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        profile.user.set_password(data['password'])
+        profile.user.save(update_fields=['password'])
+
+    profile.save()
+    return Response(_staff_profile_to_dict(profile))
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_role_permissions(request):
+    """
+    GET /api/admin/staff/role-permissions/
+    Retourne les permissions par défaut de chaque rôle.
+    """
+    return Response(ROLE_DEFAULT_PERMISSIONS)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# WEB PUSH NOTIFICATIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def push_vapid_key(request):
+    """
+    GET /api/push/vapid-key/
+    Retourne la clé VAPID publique pour l'abonnement côté client.
+    """
+    from django.conf import settings as dj_settings
+    key = getattr(dj_settings, 'VAPID_PUBLIC_KEY', '')
+    if not key:
+        return Response({'error': 'Push notifications non configurées.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    return Response({'public_key': key})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def push_subscribe(request):
+    """
+    POST /api/push/subscribe/
+    Body: { endpoint, keys: { p256dh, auth }, universes: [] }
+    Crée ou met à jour la souscription push de l'utilisateur.
+    """
+    endpoint  = request.data.get('endpoint', '').strip()
+    keys      = request.data.get('keys', {})
+    p256dh    = keys.get('p256dh', '').strip()
+    auth_key  = keys.get('auth', '').strip()
+    universes = request.data.get('universes', [])
+
+    if not endpoint or not p256dh or not auth_key:
+        return Response({'error': 'endpoint, p256dh et auth requis.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    sub, created = PushSubscription.objects.update_or_create(
+        endpoint=endpoint,
+        defaults={
+            'user':      request.user,
+            'p256dh':    p256dh,
+            'auth_key':  auth_key,
+            'universes': universes if isinstance(universes, list) else [],
+        },
+    )
+    return Response({'subscribed': True, 'created': created})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def push_unsubscribe(request):
+    """
+    POST /api/push/unsubscribe/
+    Body: { endpoint }
+    Supprime la souscription push.
+    """
+    endpoint = request.data.get('endpoint', '').strip()
+    if not endpoint:
+        return Response({'error': 'endpoint requis.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    deleted, _ = PushSubscription.objects.filter(endpoint=endpoint, user=request.user).delete()
+    return Response({'unsubscribed': deleted > 0})

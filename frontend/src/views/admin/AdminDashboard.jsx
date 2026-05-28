@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { adminAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
 import MobileBackButton from '../../components/MobileBackButton';
+import { subscribeToPush, unsubscribeFromPush, isSubscribed, isPushSupported } from '../../services/pushService';
+import useAuthStore from '../../store/auth';
 
 const SHORTCUTS = [
   { to: '/admin-dashboard/produits',          icon: 'fa-box',                    label: 'Produits',          desc: 'Ajouter, modifier, archiver' },
@@ -14,16 +16,39 @@ const SHORTCUTS = [
   { to: '/admin-dashboard/contacts',          icon: 'fa-comments',               label: 'Messages',          desc: 'Formulaire de contact' },
   { to: '/admin-dashboard/demandes-produits', icon: 'fa-magnifying-glass-plus',  label: 'Demandes produits', desc: 'Produits recherchés par les visiteurs' },
   { to: '/admin-dashboard/analytics',         icon: 'fa-chart-line',             label: 'Analytics',         desc: 'Trafic, ventes, géoloc' },
+  { to: '/admin-dashboard/equipe',            icon: 'fa-users',                  label: 'Équipe',            desc: 'Comptes staff & permissions', superadminOnly: true },
 ];
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState(null);
+  const [stats,         setStats]         = useState(null);
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushLoading,   setPushLoading]   = useState(false);
+  const [pushMsg,       setPushMsg]       = useState('');
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     adminAPI.stats()
       .then(({ data }) => setStats(data))
       .catch(() => {});
+    // Vérifier l'état d'abonnement push
+    isSubscribed().then(setPushSubscribed);
   }, []);
+
+  async function handlePushToggle() {
+    setPushLoading(true);
+    setPushMsg('');
+    if (pushSubscribed) {
+      const res = await unsubscribeFromPush();
+      if (res.success) { setPushSubscribed(false); setPushMsg('Notifications désactivées.'); }
+      else setPushMsg('Erreur lors de la désinscription.');
+    } else {
+      const res = await subscribeToPush([]);
+      if (res.success) { setPushSubscribed(true); setPushMsg(res.message); }
+      else setPushMsg(res.message);
+    }
+    setPushLoading(false);
+    setTimeout(() => setPushMsg(''), 4000);
+  }
 
   const STAT_CARDS = stats ? [
     {
@@ -118,7 +143,7 @@ export default function AdminDashboard() {
           Accès rapides
         </h4>
         <div className="eth-admin-shortcuts-grid">
-          {SHORTCUTS.map((link) => (
+          {SHORTCUTS.filter((link) => !link.superadminOnly || (user && user.is_superuser)).map((link) => (
             <Link key={link.label} to={link.to} className="eth-admin-shortcut-card">
               <div className="eth-admin-shortcut-icon">
                 <i className={`fa-solid ${link.icon}`}></i>
@@ -131,6 +156,48 @@ export default function AdminDashboard() {
             </Link>
           ))}
         </div>
+
+        {/* ── Notifications push ───────────────────────────────────────── */}
+        {isPushSupported() && (
+          <div style={{
+            marginTop: 40, padding: '20px 24px',
+            background: '#fff', borderRadius: 'var(--r-lg)',
+            border: '1px solid var(--sand)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 16, flexWrap: 'wrap',
+          }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-dark)' }}>
+                <i className={`fa-solid fa-${pushSubscribed ? 'bell' : 'bell-slash'} me-2`}
+                   style={{ color: pushSubscribed ? 'var(--tc-classic)' : 'var(--text-light)' }}></i>
+                Notifications push
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-light)', marginTop: 4 }}>
+                {pushSubscribed
+                  ? 'Vous recevrez des notifications pour les nouvelles commandes, messages et alertes stock.'
+                  : 'Activez les notifications pour être alerté en temps réel.'}
+              </div>
+              {pushMsg && (
+                <div style={{ fontSize: 13, marginTop: 6, color: pushSubscribed ? 'var(--bio-main)' : 'var(--tc-classic)' }}>
+                  {pushMsg}
+                </div>
+              )}
+            </div>
+            <button
+              className={`eth-btn-sm ${pushSubscribed ? 'eth-btn-outline' : 'eth-btn-primary'}`}
+              onClick={handlePushToggle}
+              disabled={pushLoading}
+              style={{ whiteSpace: 'nowrap', minWidth: 160 }}
+            >
+              {pushLoading
+                ? <span className="spinner-border spinner-border-sm" />
+                : pushSubscribed
+                  ? <><i className="fa-solid fa-bell-slash me-2"></i>Désactiver</>
+                  : <><i className="fa-solid fa-bell me-2"></i>Activer les notifs</>
+              }
+            </button>
+          </div>
+        )}
 
       </div>
     </div>

@@ -51,14 +51,32 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('pid',)
 
 
+# ── Staff Profile (inline) ────────────────────────────────────────────────────
+class StaffProfileInlineSerializer(serializers.Serializer):
+    """Représentation légère du StaffProfile pour inclusion dans UserSerializer."""
+    role                   = serializers.CharField()
+    role_label             = serializers.SerializerMethodField()
+    extra_permissions      = serializers.JSONField()
+    effective_permissions  = serializers.SerializerMethodField()
+    notify_universes       = serializers.JSONField()
+    is_active              = serializers.BooleanField()
+
+    def get_role_label(self, obj):
+        return obj.get_role_display()
+
+    def get_effective_permissions(self, obj):
+        return obj.get_effective_permissions()
+
+
 # ── Utilisateur (lecture) ─────────────────────────────────────────────────────
 class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(read_only=True)
+    profile       = ProfileSerializer(read_only=True)
+    staff_profile = StaffProfileInlineSerializer(read_only=True)
 
     class Meta:
         model  = User
         fields = ('id', 'email', 'username', 'full_name', 'phone',
-                  'is_staff', 'is_superuser', 'profile')
+                  'is_staff', 'is_superuser', 'profile', 'staff_profile')
         read_only_fields = ('id', 'email', 'username', 'is_staff', 'is_superuser')
 
 

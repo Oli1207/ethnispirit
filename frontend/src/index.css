@@ -5829,3 +5829,146 @@ a { text-decoration: none; color: inherit; }
   .eth-bottom-nav-item { padding: 6px 6px; min-width: 36px; font-size: 9px; }
   .eth-bottom-nav-item i { font-size: 16px; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADMIN TEAM / STAFF RBAC
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Section container ────────────────────────────────────────────────── */
+.eth-admin-section { padding: 32px 24px; max-width: 1100px; margin: 0 auto; }
+.eth-admin-section-header { margin-bottom: 28px; }
+.eth-admin-section-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text-dark); margin: 0; }
+
+/* ── Admin buttons ────────────────────────────────────────────────────── */
+.eth-admin-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--tc-classic); color: #fff;
+  border: 2px solid var(--tc-classic);
+  border-radius: var(--r-pill); padding: 9px 20px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background .2s, color .2s; text-decoration: none;
+}
+.eth-admin-btn:hover { background: var(--tc-dark); border-color: var(--tc-dark); }
+.eth-admin-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.eth-admin-btn-sm { padding: 6px 14px; font-size: 13px; }
+.eth-admin-btn-outline { background: transparent; color: var(--tc-classic); }
+.eth-admin-btn-outline:hover { background: var(--tc-classic); color: #fff; }
+.eth-admin-btn-danger { background: #e53e3e; border-color: #e53e3e; color: #fff; }
+.eth-admin-btn-danger:hover { background: #c53030; border-color: #c53030; }
+
+/* ── Admin inputs ────────────────────────────────────────────────────── */
+.eth-admin-label { font-size: 13px; font-weight: 600; color: var(--text-mid); margin-bottom: 6px; display: block; }
+.eth-admin-input {
+  width: 100%; border: 1.5px solid var(--sand); border-radius: var(--r-sm);
+  padding: 9px 14px; font-size: 14px; color: var(--text-dark);
+  background: var(--white); transition: border-color .2s;
+}
+.eth-admin-input:focus { outline: none; border-color: var(--tc-classic); box-shadow: 0 0 0 3px rgba(198,93,59,.12); }
+
+/* ── Admin empty state ───────────────────────────────────────────────── */
+.eth-admin-empty { text-align: center; padding: 48px 24px; color: var(--text-light); }
+
+/* ── Badges ─────────────────────────────────────────────────────────── */
+.eth-badge {
+  display: inline-flex; align-items: center;
+  border-radius: var(--r-pill); padding: 3px 10px;
+  font-size: 12px; font-weight: 600;
+  background: var(--sand); color: var(--text-mid);
+}
+.eth-badge-sm { font-size: 11px; padding: 2px 8px; }
+.eth-badge-success { background: rgba(45,90,46,.12); color: var(--bio-main); }
+.eth-badge-danger  { background: rgba(229,62,62,.12); color: #c53030; }
+.eth-badge-perm    { background: rgba(198,93,59,.1); color: var(--tc-classic); }
+
+/* Rôle badges */
+.eth-badge-role { font-size: 12px; font-weight: 600; }
+.eth-badge-delivery   { background: rgba(38,128,194,.1); color: #2680C2; }
+.eth-badge-catalog    { background: rgba(198,93,59,.1); color: var(--tc-classic); }
+.eth-badge-support    { background: rgba(230,160,32,.12); color: #C07800; }
+.eth-badge-accounting { background: rgba(45,90,46,.12); color: var(--bio-main); }
+.eth-badge-superadmin { background: rgba(107,62,46,.15); color: var(--brown); }
+
+/* ── Permission chips grid ───────────────────────────────────────────── */
+.eth-perm-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 12px; background: var(--cream); border-radius: var(--r-sm);
+}
+.eth-perm-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  border: 1.5px solid var(--sand); background: var(--white);
+  color: var(--text-light); transition: all .15s; user-select: none;
+  position: relative;
+}
+.eth-perm-chip.active { border-color: var(--tc-classic); background: rgba(198,93,59,.08); color: var(--tc-classic); font-weight: 600; }
+.eth-perm-chip.overridden { border-style: dashed; }
+.eth-perm-dot {
+  position: absolute; top: -3px; right: -3px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--tc-classic); border: 2px solid #fff;
+}
+
+/* ── Preview permissions effectives ──────────────────────────────────── */
+.eth-perm-preview {
+  background: var(--cream); border-radius: var(--r-sm);
+  padding: 12px 14px; margin-top: 4px;
+}
+
+/* ── Alert boxes ─────────────────────────────────────────────────────── */
+.eth-alert { padding: 10px 14px; border-radius: var(--r-sm); font-size: 13.5px; }
+.eth-alert-danger  { background: rgba(229,62,62,.1); color: #c53030; border: 1px solid rgba(229,62,62,.2); }
+.eth-alert-success { background: rgba(45,90,46,.1); color: var(--bio-main); border: 1px solid rgba(45,90,46,.2); }
+
+/* ── Modal overlay / dialog ──────────────────────────────────────────── */
+.eth-modal-overlay {
+  position: fixed; inset: 0; z-index: 1060;
+  background: rgba(44,24,16,.55); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; overflow-y: auto;
+}
+.eth-modal {
+  background: #fff; border-radius: var(--r-lg);
+  width: 100%; max-width: 540px;
+  box-shadow: var(--sh-lg); position: relative;
+  max-height: 90vh; overflow-y: auto;
+}
+.eth-modal-lg { max-width: 700px; }
+.eth-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 0; border-bottom: 1px solid var(--sand); padding-bottom: 16px;
+}
+.eth-modal-header h5 { font-family: 'Playfair Display', serif; font-size: 18px; margin: 0; color: var(--text-dark); }
+.eth-modal-close {
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  color: var(--text-light); padding: 4px; border-radius: 50%;
+  transition: color .15s;
+}
+.eth-modal-close:hover { color: var(--tc-classic); }
+.eth-modal-body { padding: 20px 24px; }
+.eth-modal-footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding-top: 16px; border-top: 1px solid var(--sand);
+}
+
+/* ── Small push-related button ──────────────────────────────────────── */
+.eth-btn-sm {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: var(--r-pill);
+  font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: all .2s; border: 2px solid var(--tc-classic);
+}
+.eth-btn-sm.eth-btn-primary { background: var(--tc-classic); color: #fff; }
+.eth-btn-sm.eth-btn-primary:hover { background: var(--tc-dark); }
+.eth-btn-sm.eth-btn-outline { background: transparent; color: var(--tc-classic); }
+.eth-btn-sm.eth-btn-outline:hover { background: var(--tc-classic); color: #fff; }
+.eth-btn-sm:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ── Responsive AdminTeam ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .eth-admin-section { padding: 20px 16px; }
+  .eth-modal { max-width: 100%; border-radius: var(--r-md) var(--r-md) 0 0; align-self: flex-end; }
+  .eth-perm-grid { gap: 6px; }
+  .eth-perm-chip { font-size: 11px; padding: 4px 10px; }
+}

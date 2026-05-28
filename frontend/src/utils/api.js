@@ -142,4 +142,18 @@ export const adminAPI = {
 
   // Export CSV commandes
   exportOrders: () => axiosInstance.get('/api/admin/orders/export-csv/', { responseType: 'blob' }),
+
+  // Staff RBAC
+  staffList:       ()           => axiosInstance.get('/api/admin/staff/'),
+  staffCreate:     (data)       => axiosInstance.post('/api/admin/staff/create/', data),
+  staffUpdate:     (id, data)   => axiosInstance.patch(`/api/admin/staff/${id}/`, data),
+  staffDelete:     (id)         => axiosInstance.delete(`/api/admin/staff/${id}/`),
+  rolePermissions: ()           => axiosInstance.get('/api/admin/staff/role-permissions/'),
+};
+
+// ── Push Notifications ────────────────────────────────────────────────────────
+export const pushAPI = {
+  vapidKey:    ()      => axiosInstance.get('/api/push/vapid-key/'),
+  subscribe:   (data)  => axiosInstance.post('/api/push/subscribe/', data),
+  unsubscribe: (data)  => axiosInstance.post('/api/push/unsubscribe/', data),
 };

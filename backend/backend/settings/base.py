@@ -159,6 +159,18 @@ EMAIL_USE_LOCALTIME = True
 STRIPE_SECRET_KEY      = env.str('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = env.str('STRIPE_PUBLISHABLE_KEY')
 
+# ── Web Push (VAPID) ──────────────────────────────────────────────────────────
+# Clé publique (base64url, 65 bytes non compressé P-256)
+VAPID_PUBLIC_KEY = env.str('VAPID_PUBLIC_KEY', default='')
+
+# Clé privée — chemin vers le fichier PEM (relatif à BASE_DIR/backend)
+_vapid_key_file = env.str('VAPID_PRIVATE_KEY_FILE', default='vapid_private.pem')
+VAPID_PRIVATE_KEY = str(BASE_DIR / _vapid_key_file)
+
+VAPID_CLAIMS = {
+    'sub': f'mailto:{env.str("VAPID_CONTACT_EMAIL", default="support@ethnispirit.com")}',
+}
+
 # ── Frontend URL ──────────────────────────────────────────────────────────────
 FRONTEND_URL = env.str('FRONTEND_URL', default='http://localhost:5173')
 

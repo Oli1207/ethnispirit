@@ -18,6 +18,7 @@ ENV/
 # ── Fichiers secrets — JAMAIS dans git ───────────────────────────────────────
 backend/.env
 backend/.env.production
+backend/vapid_private.pem
 frontend/.env
 frontend/.env.local
 frontend/.env.production

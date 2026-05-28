@@ -511,6 +511,108 @@ class ProductRequest(models.Model):
         return f'Demande — {self.name or "Anonyme"} — {self.date.strftime("%d/%m/%Y")}'
 
 
+# ── Staff RBAC ────────────────────────────────────────────────────────────────
+STAFF_ROLE_CHOICES = [
+    ('delivery',   'Livraison'),
+    ('catalog',    'Catalogue'),
+    ('support',    'Service client'),
+    ('accounting', 'Comptabilité'),
+    ('superadmin', 'Super Admin'),
+]
+
+ROLE_DEFAULT_PERMISSIONS = {
+    'delivery': {
+        'orders_view': True,
+        'orders_manage': True,
+        'orders_status_only': True,
+    },
+    'catalog': {
+        'products_view': True,
+        'products_manage': True,
+        'categories_manage': True,
+    },
+    'support': {
+        'orders_view': True,
+        'products_view': True,
+        'customers_view': True,
+        'reviews_manage': True,
+        'messages_view': True,
+    },
+    'accounting': {
+        'orders_view': True,
+        'products_view': True,
+        'customers_view': True,
+        'analytics_view': True,
+    },
+    'superadmin': {
+        'orders_view': True,
+        'orders_manage': True,
+        'orders_status_only': True,
+        'products_view': True,
+        'products_manage': True,
+        'categories_manage': True,
+        'promo_manage': True,
+        'customers_view': True,
+        'analytics_view': True,
+        'reviews_manage': True,
+        'messages_view': True,
+        'staff_manage': True,
+    },
+}
+
+
+class StaffProfile(models.Model):
+    """Profil de membre du personnel avec rôle + permissions individuelles."""
+    user              = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_profile')
+    role              = models.CharField(max_length=20, choices=STAFF_ROLE_CHOICES, default='support')
+    # Override granulaire par rapport aux défauts du rôle
+    extra_permissions = models.JSONField(default=dict, blank=True,
+                                         help_text='Surcharge individuelle des permissions (clé: perm_name, valeur: True/False)')
+    notify_universes  = models.JSONField(default=list, blank=True,
+                                         help_text='Univers pour lesquels recevoir des notifications push ([] = tous)')
+    is_active         = models.BooleanField(default=True)
+    created_by        = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                          related_name='created_staff')
+    date_created      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name        = 'Profil staff'
+        verbose_name_plural = 'Profils staff'
+
+    def get_effective_permissions(self):
+        """Fusionne les permissions par défaut du rôle avec les surcharges individuelles."""
+        base = dict(ROLE_DEFAULT_PERMISSIONS.get(self.role, {}))
+        base.update(self.extra_permissions or {})
+        return base
+
+    def has_permission(self, perm):
+        if self.user.is_superuser:
+            return True
+        perms = self.get_effective_permissions()
+        return bool(perms.get(perm, False))
+
+    def __str__(self):
+        return f'{self.user.email} — {self.get_role_display()}'
+
+
+# ── Push Notifications (Web Push / PWA) ───────────────────────────────────────
+class PushSubscription(models.Model):
+    user     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
+    endpoint = models.TextField(unique=True)
+    p256dh   = models.TextField()
+    auth_key = models.TextField()
+    # [] = tous les univers, ['mode'] = Mode seulement, etc.
+    universes = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name        = 'Abonnement push'
+        verbose_name_plural = 'Abonnements push'
+
+    def __str__(self):
+        return f'{self.user.email} — {self.endpoint[:40]}…'
+
+
 # ── Newsletter ────────────────────────────────────────────────────────────────
 class NewsletterSubscriber(models.Model):
     email     = models.EmailField(unique=True)

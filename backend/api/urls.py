@@ -96,4 +96,15 @@ urlpatterns = [
     path('admin/shipping/create/',                    views.admin_shipping_create,        name='admin_shipping_create'),
     path('admin/shipping/<int:zone_id>/update/',      views.admin_shipping_update,        name='admin_shipping_update'),
     path('admin/shipping/<int:zone_id>/delete/',      views.admin_shipping_delete,        name='admin_shipping_delete'),
+
+    # Admin — Staff RBAC
+    path('admin/staff/',                              views.admin_staff_list,             name='admin_staff_list'),
+    path('admin/staff/create/',                       views.admin_staff_create,           name='admin_staff_create'),
+    path('admin/staff/role-permissions/',             views.admin_role_permissions,       name='admin_role_permissions'),
+    path('admin/staff/<int:staff_id>/',               views.admin_staff_detail,           name='admin_staff_detail'),
+
+    # Push Notifications
+    path('push/vapid-key/',              views.push_vapid_key,          name='push_vapid_key'),
+    path('push/subscribe/',              views.push_subscribe,          name='push_subscribe'),
+    path('push/unsubscribe/',            views.push_unsubscribe,        name='push_unsubscribe'),
 ]
