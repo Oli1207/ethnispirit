@@ -347,9 +347,9 @@ a { text-decoration: none; color: inherit; }
   text-decoration: none;
 }
 .bio-nav-logo-img {
-  height: 52px;
+  height: 56px;
   width: auto;
-  max-width: 140px;
+  max-width: 160px;
   object-fit: contain;
   flex-shrink: 0;
   /* PNG transparent — pas de filtre, couleurs bio naturelles */

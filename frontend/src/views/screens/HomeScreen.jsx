@@ -4,7 +4,7 @@ import { categoriesAPI, productsAPI, newsletterAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
-import heroBg from '../../assets/hero_bg.png';
+import heroBg from '../../assets/ethni_background.jpeg';
 
 // ── Images Mode — femme caribéenne, mode africaine, bijoux ───────────────────
 const HERO_IMG  = heroBg;

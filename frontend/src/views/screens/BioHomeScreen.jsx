@@ -4,9 +4,10 @@ import { categoriesAPI, productsAPI, newsletterAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
+import heroBgImg from '../../assets/ethni_background.jpeg';
 
 // ── Images Bio — huiles, soins naturels, plantes tropicales ───────────────────
-const HERO_BG   = 'https://images.unsplash.com/photo-1595871522483-00a17611a5e3?w=1400&q=85'; // flacons huiles essentielles
+const HERO_BG   = heroBgImg;
 const HERO_IMG2 = 'https://images.unsplash.com/photo-1560769680-ba2f3767c785?w=700&q=85';     // huile de coco naturelle
 const HERO_IMG3 = 'https://images.unsplash.com/photo-1598779795578-2afceafed88e?w=700&q=85';  // beurre de karité + fleurs
 const STORY_IMG = 'https://images.unsplash.com/photo-1638131163449-70059e10de6a?w=900&q=85';  // 3 pots soins naturels

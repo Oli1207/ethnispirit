@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/auth';
 import useCartStore from '../store/cart';
-import logoBio from '../assets/logo_ethnispirit_bio.png';
+import logoBio from '../assets/logo_ethnispirit_natural.jpeg';
 import useFavicon from '../hooks/useFavicon';
 
 export default function BioNavbar() {
