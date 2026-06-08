@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
-import logoBio from '../../assets/logo_ethnispirit_bio.png';
+import logoBio from '../../assets/logo_ethnispirit_natural.jpeg';
 
 export default function BioAboutScreen() {
   return (
@@ -12,39 +12,66 @@ export default function BioAboutScreen() {
       />
       <MobileBackButton to="/bio" label="Accueil Bio" />
 
-      {/* ── Hero identité ──────────────────────────────────────────────── */}
+      {/* ── Carte d'identité de marque ─────────────────────────────────── */}
       <section className="bio-about-hero">
         <div className="bio-about-hero-inner">
-          {/* Logo centré */}
-          <div className="bio-about-logo-wrap">
-            <img src={logoBio} alt="EthniSpirit Natural" className="bio-about-logo" />
-          </div>
 
-          {/* Texte intro */}
-          <p className="bio-about-intro">
-            EthniSpirit est une marque afro-caribéenne qui célèbre le lien profond
-            entre l'Afrique et la Caraïbe.
-          </p>
-          <p className="bio-about-intro">
-            Nos trésors naturels sont 100&nbsp;% biologiques et issus d'un savoir-faire ancestral.
-          </p>
-          <p className="bio-about-intro">
-            Importés directement d'Afrique, ils prennent soin de la peau,
-            des cheveux et de la santé, tout en respectant la planète.
-          </p>
-        </div>
-      </section>
+          {/* Carte principale */}
+          <div className="bio-about-brand-card">
 
-      {/* ── Mission ────────────────────────────────────────────────────── */}
-      <section className="bio-about-mission">
-        <div className="bio-about-mission-inner">
-          <div className="bio-about-mission-text">
+            {/* Logo */}
+            <div className="bio-about-logo-wrap">
+              <img src={logoBio} alt="EthniSpirit Natural" className="bio-about-logo" />
+            </div>
+
+            {/* Séparateur décoratif */}
+            <div className="bio-about-sep">
+              <span className="bio-about-sep-line" />
+              <i className="fa-solid fa-leaf bio-about-sep-icon" />
+              <span className="bio-about-sep-line" />
+            </div>
+
+            {/* Paragraphes identité */}
+            <p className="bio-about-intro">
+              Ethnispirit est une marque afro-caribéenne qui célèbre le lien profond
+              entre l'Afrique et la Caraïbe.
+            </p>
+            <p className="bio-about-intro">
+              Nos trésors naturels sont 100&nbsp;% biologiques et issus d'un savoir-faire ancestral.
+            </p>
+            <p className="bio-about-intro">
+              Importés directement d'Afrique, ils prennent soin de la peau,
+              des cheveux et de la santé, tout en respectant la planète.
+            </p>
+
+            {/* Séparateur */}
+            <div className="bio-about-sep bio-about-sep--sm">
+              <span className="bio-about-sep-line" />
+              <span className="bio-about-sep-dot" />
+              <span className="bio-about-sep-line" />
+            </div>
+
+            {/* Mission */}
             <p className="bio-about-body">
               Alliant authenticité et élégance, Ethnispirit s'engage pour une beauté
               et un bien-être conscients, éthiques et inspirés par nos racines.
-              Chaque produit raconte une histoire : celle de la terre, des artisans,
+              Chaque produit raconte une histoire&nbsp;: celle de la terre, des artisans,
               et d'un héritage vivant qui unit les peuples.
             </p>
+
+            {/* Séparateur */}
+            <div className="bio-about-sep bio-about-sep--sm">
+              <span className="bio-about-sep-line" />
+              <span className="bio-about-sep-dot" />
+              <span className="bio-about-sep-line" />
+            </div>
+
+            {/* Tagline dans la carte */}
+            <p className="bio-about-card-tagline">
+              Ethnispirit&nbsp;: la nature au cœur, l'Afrique à l'âme,<br />
+              la Caraïbe en éclat.
+            </p>
+
           </div>
         </div>
       </section>
@@ -84,16 +111,6 @@ export default function BioAboutScreen() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── Tagline finale ─────────────────────────────────────────────── */}
-      <section className="bio-about-tagline">
-        <div className="bio-about-tagline-inner">
-          <blockquote className="bio-about-quote">
-            Ethnispirit&nbsp;: la nature au cœur, l'Afrique à l'âme,
-            la Caraïbe en éclat.
-          </blockquote>
         </div>
       </section>
 

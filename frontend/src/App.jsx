@@ -168,39 +168,39 @@ export default function App() {
           <Route path="/mot-de-passe-oublie"  element={<ForgotPasswordScreen />} />
           <Route path="/reset-password"       element={<ResetPasswordScreen />} />
 
-          {/* Admin */}
+          {/* Admin — chaque route exige la permission correspondante */}
           <Route path="/admin-dashboard" element={
             <AdminRoute><AdminDashboard /></AdminRoute>
           } />
           <Route path="/admin-dashboard/commandes" element={
-            <AdminRoute><AdminOrders /></AdminRoute>
+            <AdminRoute requiredPerm="orders_view"><AdminOrders /></AdminRoute>
           } />
           <Route path="/admin-dashboard/produits" element={
-            <AdminRoute><AdminProducts /></AdminRoute>
-          } />
-          <Route path="/admin-dashboard/newsletter" element={
-            <AdminRoute><AdminNewsletter /></AdminRoute>
-          } />
-          <Route path="/admin-dashboard/livraison" element={
-            <AdminRoute><AdminShipping /></AdminRoute>
+            <AdminRoute requiredPerm="products_view"><AdminProducts /></AdminRoute>
           } />
           <Route path="/admin-dashboard/categories" element={
-            <AdminRoute><AdminCategories /></AdminRoute>
+            <AdminRoute requiredPerm="categories_manage"><AdminCategories /></AdminRoute>
           } />
           <Route path="/admin-dashboard/promo" element={
-            <AdminRoute><AdminPromoCodes /></AdminRoute>
+            <AdminRoute requiredPerm="promo_manage"><AdminPromoCodes /></AdminRoute>
           } />
           <Route path="/admin-dashboard/contacts" element={
-            <AdminRoute><AdminContacts /></AdminRoute>
+            <AdminRoute requiredPerm="messages_view"><AdminContacts /></AdminRoute>
           } />
           <Route path="/admin-dashboard/analytics" element={
-            <AdminRoute><AdminAnalytics /></AdminRoute>
+            <AdminRoute requiredPerm="analytics_view"><AdminAnalytics /></AdminRoute>
           } />
           <Route path="/admin-dashboard/demandes-produits" element={
-            <AdminRoute><AdminProductRequests /></AdminRoute>
+            <AdminRoute requiredPerm="products_view"><AdminProductRequests /></AdminRoute>
+          } />
+          <Route path="/admin-dashboard/newsletter" element={
+            <AdminRoute superadminOnly><AdminNewsletter /></AdminRoute>
+          } />
+          <Route path="/admin-dashboard/livraison" element={
+            <AdminRoute superadminOnly><AdminShipping /></AdminRoute>
           } />
           <Route path="/admin-dashboard/equipe" element={
-            <AdminRoute><AdminTeam /></AdminRoute>
+            <AdminRoute superadminOnly><AdminTeam /></AdminRoute>
           } />
         </Route>
 

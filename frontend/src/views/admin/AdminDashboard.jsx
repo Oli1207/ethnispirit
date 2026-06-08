@@ -5,18 +5,21 @@ import { formatPrice } from '../../utils/currency';
 import MobileBackButton from '../../components/MobileBackButton';
 import { subscribeToPush, unsubscribeFromPush, isSubscribed, isPushSupported } from '../../services/pushService';
 import useAuthStore from '../../store/auth';
+import { hasPermission } from '../../utils/permissions';
 
+// permission: null = accessible à tout staff connecté
+// superadminOnly: true = is_superuser ou rôle superadmin uniquement
 const SHORTCUTS = [
-  { to: '/admin-dashboard/produits',          icon: 'fa-box',                    label: 'Produits',          desc: 'Ajouter, modifier, archiver' },
-  { to: '/admin-dashboard/commandes',         icon: 'fa-bag-shopping',           label: 'Commandes',         desc: 'Suivi et statuts' },
-  { to: '/admin-dashboard/categories',        icon: 'fa-tags',                   label: 'Catégories',        desc: 'Mode et Bio' },
-  { to: '/admin-dashboard/promo',             icon: 'fa-tag',                    label: 'Codes promo',       desc: 'Créer et gérer les réductions' },
-  { to: '/admin-dashboard/newsletter',        icon: 'fa-envelope',               label: 'Newsletter',        desc: 'Liste des abonnés' },
-  { to: '/admin-dashboard/livraison',         icon: 'fa-truck-fast',             label: 'Livraison',         desc: 'Zones et tarifs' },
-  { to: '/admin-dashboard/contacts',          icon: 'fa-comments',               label: 'Messages',          desc: 'Formulaire de contact' },
-  { to: '/admin-dashboard/demandes-produits', icon: 'fa-magnifying-glass-plus',  label: 'Demandes produits', desc: 'Produits recherchés par les visiteurs' },
-  { to: '/admin-dashboard/analytics',         icon: 'fa-chart-line',             label: 'Analytics',         desc: 'Trafic, ventes, géoloc' },
-  { to: '/admin-dashboard/equipe',            icon: 'fa-users',                  label: 'Équipe',            desc: 'Comptes staff & permissions', superadminOnly: true },
+  { to: '/admin-dashboard/commandes',         icon: 'fa-bag-shopping',           label: 'Commandes',         desc: 'Suivi et statuts',                        permission: 'orders_view' },
+  { to: '/admin-dashboard/produits',          icon: 'fa-box',                    label: 'Produits',          desc: 'Ajouter, modifier, archiver',             permission: 'products_view' },
+  { to: '/admin-dashboard/categories',        icon: 'fa-tags',                   label: 'Catégories',        desc: 'Mode et Bio',                             permission: 'categories_manage' },
+  { to: '/admin-dashboard/promo',             icon: 'fa-tag',                    label: 'Codes promo',       desc: 'Créer et gérer les réductions',           permission: 'promo_manage' },
+  { to: '/admin-dashboard/contacts',          icon: 'fa-comments',               label: 'Messages',          desc: 'Formulaire de contact',                   permission: 'messages_view' },
+  { to: '/admin-dashboard/demandes-produits', icon: 'fa-magnifying-glass-plus',  label: 'Demandes produits', desc: 'Produits recherchés par les visiteurs',   permission: 'products_view' },
+  { to: '/admin-dashboard/analytics',         icon: 'fa-chart-line',             label: 'Analytics',         desc: 'Trafic, ventes, géoloc',                  permission: 'analytics_view' },
+  { to: '/admin-dashboard/newsletter',        icon: 'fa-envelope',               label: 'Newsletter',        desc: 'Liste des abonnés',                       superadminOnly: true },
+  { to: '/admin-dashboard/livraison',         icon: 'fa-truck-fast',             label: 'Livraison',         desc: 'Zones et tarifs',                         superadminOnly: true },
+  { to: '/admin-dashboard/equipe',            icon: 'fa-users',                  label: 'Équipe',            desc: 'Comptes staff & permissions',             superadminOnly: true },
 ];
 
 export default function AdminDashboard() {
@@ -143,7 +146,12 @@ export default function AdminDashboard() {
           Accès rapides
         </h4>
         <div className="eth-admin-shortcuts-grid">
-          {SHORTCUTS.filter((link) => !link.superadminOnly || (user && user.is_superuser)).map((link) => (
+          {SHORTCUTS.filter((link) => {
+          const isSuperAdmin = user?.is_superuser || user?.staff_profile?.role === 'superadmin';
+          if (link.superadminOnly) return isSuperAdmin;
+          if (link.permission)    return hasPermission(user, link.permission);
+          return true;
+        }).map((link) => (
             <Link key={link.label} to={link.to} className="eth-admin-shortcut-card">
               <div className="eth-admin-shortcut-icon">
                 <i className={`fa-solid ${link.icon}`}></i>

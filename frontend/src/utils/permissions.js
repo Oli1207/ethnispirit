@@ -88,9 +88,12 @@ export const ROLE_DEFAULT_PERMISSIONS = {
  */
 export function hasPermission(user, perm) {
   if (!user) return false;
-  if (user.is_superuser) return true;
 
+  // Superadmin Django ou rôle superadmin → accès total
+  if (user.is_superuser) return true;
   const sp = user.staff_profile;
+  if (sp?.role === 'superadmin' && sp?.is_active) return true;
+
   if (!sp || !sp.is_active) return false;
 
   // Utiliser effective_permissions renvoyé par le backend si disponible
@@ -99,10 +102,9 @@ export function hasPermission(user, perm) {
   }
 
   // Fallback local : rôle par défaut + extra_permissions
-  const base = ROLE_DEFAULT_PERMISSIONS[sp.role] || {};
+  const base  = ROLE_DEFAULT_PERMISSIONS[sp.role] || {};
   const extra = sp.extra_permissions || {};
-  const merged = { ...base, ...extra };
-  return Boolean(merged[perm]);
+  return Boolean({ ...base, ...extra }[perm]);
 }
 
 /**

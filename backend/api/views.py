@@ -32,7 +32,7 @@ from . import stripe_service
 @permission_classes([AllowAny])
 def categories_list(request):
     universe = request.query_params.get('universe')
-    qs = Category.objects.prefetch_related('subcategories')
+    qs = Category.objects.prefetch_related('subcategories').order_by('order', 'id')
     if universe:
         qs = qs.filter(universe=universe)
     serializer = CategorySerializer(qs, many=True, context={'request': request})

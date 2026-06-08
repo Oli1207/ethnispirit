@@ -2,16 +2,143 @@ import { useEffect, useRef, useState } from 'react';
 import { adminAPI, categoriesAPI } from '../../utils/api';
 import MobileBackButton from '../../components/MobileBackButton';
 
-const EMPTY = { name: '', universe: 'mode', description: '', order: 0 };
+const MAX_DISPLAY = 4; // slots affichés sur la homepage (0 → 3)
+
+const EMPTY = { name: '', universe: 'mode', description: '', order: null };
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+/** Retourne le slot libre le plus bas dans un ensemble de slots pris */
+function nextFreeSlot(takenSet, exclude = null) {
+  let i = 0;
+  while (takenSet.has(i) && i !== exclude) i++;
+  // Si exclude a libéré une place avant i, reprendre depuis 0
+  for (let j = 0; j < i; j++) {
+    if (!takenSet.has(j) || j === exclude) return j;
+  }
+  return i;
+}
+
+// ── Sélecteur de slot visuel ──────────────────────────────────────────────────
+function SlotPicker({ value, universe, allCategories, currentId, onChange }) {
+  // Catégories du même univers (hors celle qu'on modifie)
+  const peers = allCategories.filter(c => c.universe === universe && c.id !== currentId);
+
+  // Map order → catégorie occupante
+  const occupied = {};
+  peers.forEach(c => { if (c.order !== null && c.order !== undefined) occupied[c.order] = c; });
+
+  // Quel slot est conflictuel ?
+  const conflict = value !== null && value !== '' && occupied[value]
+    ? occupied[value]
+    : null;
+
+  // Prochain slot libre si conflit
+  const takenSet = new Set(peers.map(c => c.order).filter(o => o !== null));
+  const displaced = conflict ? nextFreeSlot(takenSet, value) : null;
+
+  const uColor   = universe === 'bio' ? 'var(--bio-main)' : 'var(--tc-classic)';
+  const uBg      = universe === 'bio' ? 'rgba(45,90,46,.1)' : 'rgba(198,93,59,.1)';
+
+  return (
+    <div>
+      {/* Grille de slots */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${MAX_DISPLAY}, 1fr)`, gap: 8, marginBottom: 10 }}>
+        {Array.from({ length: MAX_DISPLAY }, (_, i) => {
+          const occ       = occupied[i];
+          const isMe      = value === i;
+          const isTaken   = Boolean(occ);
+          const isConflict = isMe && isTaken;
+
+          let bg, border, textColor, cursor;
+          if (isMe && !isTaken) {
+            bg = uBg; border = `2px solid ${uColor}`; textColor = uColor; cursor = 'default';
+          } else if (isConflict) {
+            bg = 'rgba(234,179,8,.12)'; border = '2px solid #D97706'; textColor = '#92400E'; cursor = 'pointer';
+          } else if (isTaken) {
+            bg = 'var(--cream)'; border = '1.5px solid var(--sand)'; textColor = 'var(--text-mid)'; cursor = 'pointer';
+          } else {
+            bg = '#fff'; border = '1.5px dashed var(--sand)'; textColor = 'var(--text-light)'; cursor = 'pointer';
+          }
+
+          return (
+            <button
+              key={i}
+              type="button"
+              title={occ ? `Occupé par : ${occ.name}` : `Libre`}
+              onClick={() => onChange(i)}
+              style={{
+                padding: '10px 4px', borderRadius: 8, border, background: bg, cursor,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                transition: 'all .15s', minWidth: 0,
+              }}
+            >
+              {/* Numéro de position */}
+              <span style={{ fontSize: 11, fontWeight: 700, color: isMe && !isTaken ? uColor : 'var(--text-light)', lineHeight: 1 }}>
+                #{i + 1}
+              </span>
+              {/* Nom ou état */}
+              <span style={{
+                fontSize: 10, fontWeight: 600, color: textColor, textAlign: 'center',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                maxWidth: '100%', lineHeight: 1.3,
+              }}>
+                {isMe && !isTaken ? '✓ Sélectionné' : isTaken ? occ.name : 'Libre'}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Légende */}
+      <div style={{ display: 'flex', gap: 14, marginBottom: 8, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 10, color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: uBg, border: `1.5px solid ${uColor}`, display: 'inline-block' }} />
+          Votre sélection
+        </span>
+        <span style={{ fontSize: 10, color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--cream)', border: '1.5px solid var(--sand)', display: 'inline-block' }} />
+          Occupé
+        </span>
+        <span style={{ fontSize: 10, color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: '#fff', border: '1.5px dashed var(--sand)', display: 'inline-block' }} />
+          Libre
+        </span>
+      </div>
+
+      {/* Avertissement de conflit */}
+      {conflict && (
+        <div style={{
+          background: 'rgba(234,179,8,.10)', border: '1px solid #D97706',
+          borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#92400E',
+          display: 'flex', gap: 8, alignItems: 'flex-start',
+        }}>
+          <i className="fa-solid fa-triangle-exclamation" style={{ marginTop: 1, flexShrink: 0 }}></i>
+          <span>
+            La position&nbsp;<strong>#{value + 1}</strong> est déjà occupée par&nbsp;
+            <strong>«&nbsp;{conflict.name}&nbsp;»</strong>.
+            En enregistrant, <strong>«&nbsp;{conflict.name}&nbsp;»</strong> sera
+            automatiquement déplacée vers la position <strong>#{displaced + 1}</strong> (prochaine libre).
+          </span>
+        </div>
+      )}
+
+      {/* Note limite */}
+      <p style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 8, marginBottom: 0 }}>
+        <i className="fa-solid fa-circle-info me-1"></i>
+        Seules les {MAX_DISPLAY} premières positions sont affichées sur la page d'accueil.
+      </p>
+    </div>
+  );
+}
 
 // ── Modal Catégorie ───────────────────────────────────────────────────────────
-function CategoryModal({ category, onClose, onSaved }) {
-  const isEdit       = Boolean(category);
+function CategoryModal({ category, allCategories, onClose, onSaved }) {
+  const isEdit = Boolean(category);
   const [form, setF] = useState(isEdit ? {
     name:        category.name,
     universe:    category.universe,
     description: category.description || '',
-    order:       category.order || 0,
+    order:       category.order ?? null,
   } : { ...EMPTY });
   const [imageFile,    setImageFile]    = useState(null);
   const [imagePreview, setImagePreview] = useState(isEdit ? category.image || null : null);
@@ -20,6 +147,11 @@ function CategoryModal({ category, onClose, onSaved }) {
   const fileRef = useRef();
 
   const set = (k, v) => setF(prev => ({ ...prev, [k]: v }));
+
+  // Quand l'univers change, réinitialiser la position si elle crée un conflit inattendu
+  function changeUniverse(u) {
+    setF(prev => ({ ...prev, universe: u, order: null }));
+  }
 
   function pickImage(e) {
     const f = e.target.files[0];
@@ -31,20 +163,37 @@ function CategoryModal({ category, onClose, onSaved }) {
     e.target.value = '';
   }
 
+  // Catégorie conflictuelle (même univers, même order, pas nous)
+  const peers = allCategories.filter(c => c.universe === form.universe && c.id !== category?.id);
+  const conflict = form.order !== null && peers.find(c => c.order === form.order) || null;
+  const takenSet = new Set(peers.map(c => c.order).filter(o => o !== null));
+  const displacedTo = conflict ? nextFreeSlot(takenSet, form.order) : null;
+
   async function save() {
     if (!form.name.trim()) return setError('Le nom est requis.');
+    if (form.order === null || form.order === '') return setError('Choisissez une position d\'affichage.');
     setError('');
     setSaving(true);
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      Object.entries(form).forEach(([k, v]) => { if (v !== null) fd.append(k, v); });
       if (imageFile) fd.append('image', imageFile);
 
+      // 1. Sauvegarder la catégorie courante
       const saved = isEdit
         ? (await adminAPI.updateCategory(category.id, fd)).data
         : (await adminAPI.createCategory(fd)).data;
 
-      onSaved(saved, isEdit);
+      // 2. Si conflit : déplacer l'autre catégorie vers son nouveau slot
+      let updatedConflict = null;
+      if (conflict) {
+        const patchFd = new FormData();
+        patchFd.append('order', displacedTo);
+        await adminAPI.updateCategory(conflict.id, patchFd);
+        updatedConflict = { ...conflict, order: displacedTo };
+      }
+
+      onSaved(saved, isEdit, updatedConflict);
     } catch (err) {
       const msg = err.response?.data
         ? Object.values(err.response.data).flat().join(' ')
@@ -55,8 +204,6 @@ function CategoryModal({ category, onClose, onSaved }) {
     }
   }
 
-  const isBio = form.universe === 'bio';
-
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)',
@@ -64,7 +211,7 @@ function CategoryModal({ category, onClose, onSaved }) {
       padding: '32px 16px', overflowY: 'auto',
     }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div style={{
-        background: '#fff', borderRadius: 16, width: '100%', maxWidth: 480,
+        background: '#fff', borderRadius: 16, width: '100%', maxWidth: 500,
         overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.25)',
       }}>
         {/* Header */}
@@ -102,7 +249,7 @@ function CategoryModal({ category, onClose, onSaved }) {
                 <button
                   key={opt.val}
                   type="button"
-                  onClick={() => set('universe', opt.val)}
+                  onClick={() => changeUniverse(opt.val)}
                   style={{
                     flex: 1, padding: '10px 0', borderRadius: 8, cursor: 'pointer',
                     border: `2px solid ${form.universe === opt.val ? opt.color : 'var(--sand)'}`,
@@ -118,11 +265,18 @@ function CategoryModal({ category, onClose, onSaved }) {
             </div>
           </div>
 
-          {/* Ordre */}
+          {/* Position d'affichage — sélecteur visuel */}
           <div style={{ marginBottom: 16 }}>
-            <label className="eth-form-label">Ordre d'affichage</label>
-            <input type="number" min="0" className="form-control eth-input" value={form.order} onChange={e => set('order', e.target.value)} style={{ maxWidth: 100 }} />
-            <small style={{ color: 'var(--text-light)', fontSize: 11 }}>0 = première position</small>
+            <label className="eth-form-label" style={{ marginBottom: 10, display: 'block' }}>
+              Position sur la page d'accueil *
+            </label>
+            <SlotPicker
+              value={form.order}
+              universe={form.universe}
+              allCategories={allCategories}
+              currentId={category?.id}
+              onChange={v => set('order', v)}
+            />
           </div>
 
           {/* Description */}
@@ -165,7 +319,9 @@ function CategoryModal({ category, onClose, onSaved }) {
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--sand)', display: 'flex', justifyContent: 'flex-end', gap: 10, background: '#fafaf9' }}>
           <button onClick={onClose} className="btn-eth-outline" style={{ padding: '10px 22px' }}>Annuler</button>
           <button onClick={save} disabled={saving} className="btn-eth-primary" style={{ padding: '10px 28px', minWidth: 120 }}>
-            {saving ? <><span className="spinner-border spinner-border-sm me-2" style={{ width: 14, height: 14 }}></span>Enregistrement…</> : (isEdit ? 'Enregistrer' : 'Créer')}
+            {saving
+              ? <><span className="spinner-border spinner-border-sm me-2" style={{ width: 14, height: 14 }}></span>Enregistrement…</>
+              : (isEdit ? 'Enregistrer' : 'Créer')}
           </button>
         </div>
       </div>
@@ -198,12 +354,33 @@ function DeleteConfirm({ label, onConfirm, onCancel }) {
   );
 }
 
+// ── Badge position ─────────────────────────────────────────────────────────────
+function OrderBadge({ order, universe }) {
+  if (order === null || order === undefined) return (
+    <span style={{ fontSize: 11, color: 'var(--text-light)', fontStyle: 'italic' }}>Non placée</span>
+  );
+  const color = universe === 'bio' ? 'var(--bio-main)' : 'var(--tc-classic)';
+  const bg    = universe === 'bio' ? 'rgba(45,90,46,.1)' : 'rgba(198,93,59,.1)';
+  const isVisible = order < MAX_DISPLAY;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      padding: '3px 9px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+      background: isVisible ? bg : 'rgba(0,0,0,.05)',
+      color: isVisible ? color : 'var(--text-light)',
+    }}>
+      <i className={`fa-solid ${isVisible ? 'fa-eye' : 'fa-eye-slash'}`} style={{ fontSize: 9 }}></i>
+      #{order + 1}
+    </span>
+  );
+}
+
 // ── Page principale ────────────────────────────────────────────────────────────
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [filter,     setFilter]     = useState('');
-  const [modal,      setModal]      = useState(null); // null | { category: null|{} }
+  const [modal,      setModal]      = useState(null);
   const [deleting,   setDeleting]   = useState(null);
 
   useEffect(() => {
@@ -214,10 +391,18 @@ export default function AdminCategories() {
 
   const filtered = categories.filter(c => !filter || c.universe === filter);
 
-  function handleSaved(saved, isEdit) {
-    setCategories(prev =>
-      isEdit ? prev.map(c => c.id === saved.id ? saved : c) : [...prev, saved]
-    );
+  function handleSaved(saved, isEdit, updatedConflict) {
+    setCategories(prev => {
+      let next = isEdit
+        ? prev.map(c => c.id === saved.id ? saved : c)
+        : [...prev, saved];
+      // Appliquer le déplacement de la catégorie conflictuelle
+      if (updatedConflict) {
+        next = next.map(c => c.id === updatedConflict.id ? { ...c, order: updatedConflict.order } : c);
+      }
+      // Retrier par order
+      return [...next].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    });
     setModal(null);
   }
 
@@ -227,15 +412,30 @@ export default function AdminCategories() {
     setDeleting(null);
   }
 
+  // Compteurs par univers pour l'en-tête
+  const modeCount = categories.filter(c => c.universe === 'mode').length;
+  const bioCount  = categories.filter(c => c.universe === 'bio').length;
+
   return (
     <div style={{ background: 'var(--cream)', minHeight: '100vh' }}>
       <MobileBackButton to="/admin-dashboard" label="Dashboard" />
+
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="eth-page-header">
         <div className="eth-page-header-inner" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <p className="eth-section-label">Administration</p>
             <h1 className="eth-section-title">Gestion des <em>catégories</em></h1>
+            <div style={{ display: 'flex', gap: 16, marginTop: 6 }}>
+              <span style={{ fontSize: 12, color: 'var(--text-light)' }}>
+                <i className="fa-solid fa-shirt me-1" style={{ color: 'var(--tc-classic)' }}></i>
+                Mode : {modeCount}/{MAX_DISPLAY} slots
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--text-light)' }}>
+                <i className="fa-solid fa-seedling me-1" style={{ color: 'var(--bio-main)' }}></i>
+                Bio : {bioCount}/{MAX_DISPLAY} slots
+              </span>
+            </div>
           </div>
           <button onClick={() => setModal({ category: null })} className="btn-eth-primary" style={{ padding: '11px 24px' }}>
             <i className="fa-solid fa-plus me-2"></i>Nouvelle catégorie
@@ -271,7 +471,13 @@ export default function AdminCategories() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
             {filtered.map(cat => (
-              <div key={cat.id} style={{ background: '#fff', borderRadius: 'var(--r-lg)', border: '1px solid var(--sand)', overflow: 'hidden', transition: 'box-shadow .2s' }}>
+              <div key={cat.id} style={{
+                background: '#fff', borderRadius: 'var(--r-lg)',
+                border: cat.order < MAX_DISPLAY
+                  ? `1px solid ${cat.universe === 'bio' ? 'rgba(45,90,46,.2)' : 'rgba(198,93,59,.2)'}`
+                  : '1px solid var(--sand)',
+                overflow: 'hidden', transition: 'box-shadow .2s',
+              }}>
                 {/* Image */}
                 {cat.image ? (
                   <div style={{ height: 130, overflow: 'hidden' }}>
@@ -285,25 +491,32 @@ export default function AdminCategories() {
 
                 {/* Infos */}
                 <div style={{ padding: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h6 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-dark)', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {cat.name}
-                      </h6>
-                      <span style={{
-                        padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-                        background: cat.universe === 'bio' ? 'rgba(45,90,46,.12)' : 'rgba(198,93,59,.12)',
-                        color: cat.universe === 'bio' ? 'var(--bio-main)' : 'var(--tc-classic)',
-                      }}>
-                        {cat.universe === 'bio' ? 'Bio' : 'Mode'}
-                      </span>
-                    </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                    <h6 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-dark)', marginBottom: 0, flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 8 }}>
+                      {cat.name}
+                    </h6>
+                    <OrderBadge order={cat.order} universe={cat.universe} />
                   </div>
+
+                  <span style={{
+                    padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+                    background: cat.universe === 'bio' ? 'rgba(45,90,46,.12)' : 'rgba(198,93,59,.12)',
+                    color: cat.universe === 'bio' ? 'var(--bio-main)' : 'var(--tc-classic)',
+                  }}>
+                    {cat.universe === 'bio' ? '🌿 Bio' : '✨ Mode'}
+                  </span>
 
                   {cat.subcategories?.length > 0 && (
                     <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-light)' }}>
                       <i className="fa-solid fa-sitemap me-1"></i>
                       {cat.subcategories.length} sous-catégorie{cat.subcategories.length > 1 ? 's' : ''}
+                    </div>
+                  )}
+
+                  {cat.product_count > 0 && (
+                    <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-light)' }}>
+                      <i className="fa-solid fa-box me-1"></i>
+                      {cat.product_count} produit{cat.product_count > 1 ? 's' : ''}
                     </div>
                   )}
 
@@ -341,6 +554,7 @@ export default function AdminCategories() {
       {modal !== null && (
         <CategoryModal
           category={modal.category}
+          allCategories={categories}
           onClose={() => setModal(null)}
           onSaved={handleSaved}
         />
