@@ -8,12 +8,10 @@ import heroBg from '../../assets/ethni_background.jpeg';
 
 // ── Images Mode — femme caribéenne, mode africaine, bijoux ───────────────────
 const HERO_IMG  = heroBg;
-const HERO_IMG2 = 'https://images.unsplash.com/photo-1664151099399-d41ed991a10d?w=700&q=85'; // robe africaine wax print
-const HERO_IMG3 = 'https://images.unsplash.com/photo-1579624054375-72037da740e5?w=700&q=85'; // collier perles africain
 const STORY_IMG = 'https://images.unsplash.com/photo-1768212565424-efa3a3852b81?w=900&q=85'; // tissus africains colorés
 
 const MARQUEE_ITEMS = [
-  'Artisanat Ivoirien', 'Livraison Caraïbes', 'Fait avec Amour',
+  'Artisanat Africain', 'Livraison Caraïbes', 'Fait avec Amour',
   'Mode Authentique', 'Pièces Uniques', 'Femme Caribéenne',
   'Elegance Africaine', 'Certifié Naturel', 'Collection 2025',
 ];
@@ -39,7 +37,14 @@ export default function HomeScreen() {
   const [featured,   setFeatured]   = useState([]);
   const [newsEmail,  setNewsEmail]  = useState('');
   const [newsSent,   setNewsSent]   = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
   const addItem = useCartStore(s => s.addItem);
+
+  // Texte du hero disparaît après 3 secondes
+  useEffect(() => {
+    const t = setTimeout(() => setHeroVisible(false), 3000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     categoriesAPI.list('mode').then(({ data }) => setCategories(data)).catch(() => {});
@@ -90,8 +95,8 @@ export default function HomeScreen() {
           <div className="lp-hero-gradient"></div>
         </div>
 
-        {/* Content */}
-        <div className="lp-hero-inner">
+        {/* Content — disparaît après 3s */}
+        <div className={`lp-hero-inner${heroVisible ? '' : ' lp-hero-fade-out'}`}>
           <div className="lp-hero-left">
             <div className="lp-hero-eyebrow">
               <span className="lp-pulse"></span>
@@ -103,7 +108,7 @@ export default function HomeScreen() {
               <span className="lp-hero-h1-sub">dans la Caraïbe</span>
             </h1>
             <p className="lp-hero-desc">
-              Bijoux, tenues et accessoires d'origine ivoirienne,<br className="d-none d-lg-block" />
+              Bijoux, tenues et accessoires d'origine africaine,<br className="d-none d-lg-block" />
               soigneusement sélectionnés pour la femme caribéenne.
             </p>
             <div className="lp-hero-actions">
@@ -130,32 +135,6 @@ export default function HomeScreen() {
               ))}
             </div>
           </div>
-
-          {/* Collage d'images flottant */}
-          <div className="lp-hero-right">
-            <div className="lp-hero-collage">
-              <div className="lp-col-main">
-                <img src={HERO_IMG2} alt="Mode" />
-                <div className="lp-col-tag">Tenues</div>
-              </div>
-              <div className="lp-col-side">
-                <div className="lp-col-sm">
-                  <img src={HERO_IMG3} alt="Bijoux" />
-                  <div className="lp-col-tag sm">Bijoux</div>
-                </div>
-                <div className="lp-col-badge">
-                  <i className="fa-solid fa-certificate"></i>
-                  <span>100% Authentique</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="lp-scroll-hint">
-          <div className="lp-scroll-mouse"><div className="lp-scroll-dot"></div></div>
-          <span>Défiler</span>
         </div>
       </section>
 
@@ -287,7 +266,7 @@ export default function HomeScreen() {
               <i className="fa-solid fa-hands-holding"></i>
               <div>
                 <strong>Sélectionnés à la main</strong>
-                <span>Côte d'Ivoire → Caraïbe</span>
+                <span>Afrique → Caraïbe</span>
               </div>
             </div>
           </div>
@@ -299,12 +278,12 @@ export default function HomeScreen() {
             </h2>
             <p className="lp-story-text">
               EthniSpirit est né d'un amour profond pour l'artisanat africain et la culture caribéenne.
-              Chaque bijou, chaque tenue est choisi directement auprès d'artisans ivoiriens,
+              Chaque bijou, chaque tenue est choisi directement auprès d'artisans africains,
               pour apporter un peu de leur âme à la femme caribéenne.
             </p>
             <div className="lp-story-pillars">
               {[
-                { icon: 'fa-gem',               title: 'Origine',      desc: 'Côte d\'Ivoire, sourcing direct artisans' },
+                { icon: 'fa-gem',               title: 'Origine',      desc: 'Afrique, sourcing direct artisans' },
                 { icon: 'fa-award',             title: 'Qualité',      desc: 'Chaque pièce inspectée et sélectionnée' },
                 { icon: 'fa-heart',             title: 'Authenticité', desc: 'Culture et héritage africain préservés' },
               ].map(p => (

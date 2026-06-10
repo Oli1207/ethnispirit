@@ -16,7 +16,7 @@ export default function AboutScreen() {
           <div>
             <p className="eth-about-eyebrow">Notre histoire</p>
             <h1 className="eth-about-title">
-              L'artisanat ivoirien<br />au cœur des <em>Caraïbes</em>
+              L'artisanat africain<br />au cœur des <em>Caraïbes</em>
             </h1>
             <p className="eth-about-lead">
               EthniSpirit est née d'une passion pour le savoir-faire africain et
@@ -36,7 +36,7 @@ export default function AboutScreen() {
           <div className="eth-about-hero-img">
             <img
               src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=700&q=80"
-              alt="Artisanat ivoirien"
+              alt="Artisanat africain"
             />
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function AboutScreen() {
             </h2>
             <p className="eth-about-body">
               Nous sélectionnons avec soin des bijoux, vêtements, sacs et chaussures
-              fabriqués par des artisans de Côte d'Ivoire, garantissant authenticité,
+              fabriqués par des artisans d'Afrique, garantissant authenticité,
               qualité et commerce éthique à chaque pièce.
             </p>
             <p className="eth-about-body">
@@ -117,7 +117,7 @@ export default function AboutScreen() {
               {
                 icon: 'fa-globe-africa',
                 title: 'Origine authentique',
-                text: 'Toutes nos pièces proviennent exclusivement de Côte d\'Ivoire, garantissant une traçabilité complète.',
+                text: 'Toutes nos pièces proviennent d\'artisans africains, garantissant une traçabilité complète.',
               },
               {
                 icon: 'fa-gem',

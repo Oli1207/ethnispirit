@@ -37,8 +37,8 @@ const FAQS = [
     icon: 'fa-gem',
     items: [
       {
-        q: 'Les produits sont-ils authentiquement ivoiriens ?',
-        a: 'Oui. Tous nos articles de mode proviennent directement d\'artisans et créateurs de Côte d\'Ivoire, avec lesquels nous travaillons en partenariat direct et éthique.',
+        q: 'Les produits sont-ils authentiquement africains ?',
+        a: 'Oui. Tous nos articles de mode proviennent directement d\'artisans et créateurs d\'Afrique, avec lesquels nous travaillons en partenariat direct et éthique.',
       },
       {
         q: 'Les produits bio sont-ils certifiés ?',

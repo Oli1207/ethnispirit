@@ -50,7 +50,7 @@ export default function RegisterScreen() {
             Rejoignez la communauté<br /><em>EthniSpirit</em>
           </h2>
           <p className="eth-auth-left-sub">
-            Créez votre compte et découvrez notre sélection d'artisanat ivoirien livré aux Caraïbes.
+            Créez votre compte et découvrez notre sélection d'artisanat africain livré aux Caraïbes.
           </p>
           <div className="eth-auth-left-features">
             {[

@@ -48,7 +48,14 @@ export default function BioHomeScreen() {
   const [featured,   setFeatured]   = useState([]);
   const [newsEmail,  setNewsEmail]  = useState('');
   const [newsSent,   setNewsSent]   = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
   const addItem = useCartStore(s => s.addItem);
+
+  // Contenu du hero disparaît après 3 secondes
+  useEffect(() => {
+    const t = setTimeout(() => setHeroVisible(false), 3000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     categoriesAPI.list('bio').then(({ data }) => setCategories(data)).catch(() => {});
@@ -98,7 +105,7 @@ export default function BioHomeScreen() {
           <div className="blp-hero-gradient" />
         </div>
 
-        <div className="blp-hero-inner">
+        <div className={`blp-hero-inner${heroVisible ? '' : ' lp-hero-fade-out'}`}>
           <div className="blp-hero-left">
             <div className="blp-hero-eyebrow">
               <span className="blp-pulse" />
@@ -157,7 +164,7 @@ export default function BioHomeScreen() {
           </div>
         </div>
 
-        <div className="blp-scroll-hint">
+        <div className={`blp-scroll-hint${heroVisible ? '' : ' lp-hero-fade-out'}`}>
           <div className="blp-scroll-mouse"><div className="blp-scroll-dot" /></div>
           <span>Défiler</span>
         </div>
@@ -389,11 +396,11 @@ export default function BioHomeScreen() {
               EthniSpirit<br /><em>Mode &amp; Bijoux</em>
             </h2>
             <p className="blp-mode-desc">
-              Bijoux, tenues et accessoires d'origine ivoirienne,
+              Bijoux, tenues et accessoires d'origine africaine,
               soigneusement sélectionnés pour la femme caribéenne.
             </p>
             <div className="blp-mode-feats">
-              {['Artisanat Ivoirien', 'Pièces Uniques', 'Livraison Caraïbes'].map(f => (
+              {['Artisanat Africain', 'Pièces Uniques', 'Livraison Caraïbes'].map(f => (
                 <span key={f} className="blp-mode-feat">
                   <i className="fa-solid fa-check me-2" />{f}
                 </span>

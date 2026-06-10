@@ -37,7 +37,7 @@ export default function Navbar() {
         <span className="sep">|</span>
         <div className="eth-top-bar-item">
           <i className="fa-solid fa-gem"></i>
-          Artisanat authentique ivoirien
+          Artisanat authentique africain
         </div>
       </div>
 

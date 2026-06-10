@@ -23,7 +23,7 @@ export default function Footer() {
             Ethni<em>Spirit</em>
           </div>
           <p className="eth-footer-tagline">
-            Mode et artisanat ivoirien,<br />au cœur des Caraïbes.
+            Mode et artisanat africain,<br />au cœur des Caraïbes.
           </p>
           <div className="eth-footer-socials">
             <a href="#" className="eth-social-btn" aria-label="Instagram">

@@ -2069,7 +2069,17 @@ def cart_update_email(request):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _is_superuser(request):
-    return request.user and request.user.is_authenticated and request.user.is_superuser
+    """Retourne True si l'utilisateur est superuser Django OU a le rôle superadmin actif."""
+    if not (request.user and request.user.is_authenticated):
+        return False
+    if request.user.is_superuser:
+        return True
+    # Rôle superadmin via StaffProfile
+    try:
+        sp = request.user.staff_profile
+        return sp.role == 'superadmin' and sp.is_active
+    except Exception:
+        return False
 
 
 def _staff_profile_to_dict(profile, request=None):

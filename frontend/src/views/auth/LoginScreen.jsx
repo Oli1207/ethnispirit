@@ -39,7 +39,7 @@ export default function LoginScreen() {
             <span className="eth-auth-brand-name">Ethni<em>Spirit</em></span>
           </div>
           <h2 className="eth-auth-left-title">
-            L'artisanat ivoirien<br />au cœur des <em>Caraïbes</em>
+            L'artisanat africain<br />au cœur des <em>Caraïbes</em>
           </h2>
           <p className="eth-auth-left-sub">
             Bijoux, vêtements et accessoires — des pièces authentiques livrées en Martinique et Guadeloupe.
