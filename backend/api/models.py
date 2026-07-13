@@ -22,7 +22,7 @@ class Category(models.Model):
     slug        = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(blank=True)
     image       = models.ImageField(upload_to='categories/', blank=True, null=True)
-    order       = models.PositiveSmallIntegerField(default=0)
+    order       = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
     class Meta:
         verbose_name_plural = 'Catégories'
