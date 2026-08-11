@@ -70,7 +70,7 @@ export default function HomeScreen() {
     newsletterAPI.subscribe(newsEmail, 'mode').then(() => setNewsSent(true)).catch(() => {});
   }
 
-  const cats = categories.length > 0 ? categories.slice(0, 4) : [
+  const cats = categories.length > 0 ? categories : [
     { id: 1, name: 'Bijoux',     slug: 'bijoux',     image: null },
     { id: 2, name: 'Vêtements',  slug: 'vetements',  image: null },
     { id: 3, name: 'Sacs',       slug: 'sacs',       image: null },
@@ -169,14 +169,14 @@ export default function HomeScreen() {
           <div className="lp-cat-grid">
             {cats.map((cat, i) => {
               const CAT_IMGS = [
-                'https://images.unsplash.com/photo-1664151099736-1ac6365a25aa?w=700&q=85', // vêtements — robe africaine
-                'https://images.unsplash.com/photo-1629481995102-ff98d306dd8a?w=700&q=85', // bijoux — collier perles
-                'https://images.unsplash.com/photo-1768212565424-efa3a3852b81?w=700&q=85', // accessoires — tissus africains
-                'https://images.unsplash.com/photo-1687052093309-7a14efa58ecb?w=700&q=85', // tenues cérémonie
+                'https://images.unsplash.com/photo-1664151099736-1ac6365a25aa?w=700&q=85',
+                'https://images.unsplash.com/photo-1629481995102-ff98d306dd8a?w=700&q=85',
+                'https://images.unsplash.com/photo-1768212565424-efa3a3852b81?w=700&q=85',
+                'https://images.unsplash.com/photo-1687052093309-7a14efa58ecb?w=700&q=85',
               ];
               return (
                 <Link key={cat.id} to={`/catalogue?category=${cat.slug}`} className={`lp-cat-card lp-cat-${i}`} data-reveal data-delay={i > 0 ? String(i) : undefined}>
-                  <img src={cat.image || CAT_IMGS[i]} alt={cat.name} className="lp-cat-img" />
+                  <img src={cat.image || CAT_IMGS[i % CAT_IMGS.length]} alt={cat.name} className="lp-cat-img" />
                   <div className="lp-cat-overlay">
                     <div className="lp-cat-text">
                       <p className="lp-cat-sub">{cat.product_count || '—'} articles</p>
@@ -393,7 +393,7 @@ export default function HomeScreen() {
           <div className="lp-trust-bar">
             {[
               { icon: 'fa-truck-fast',          title: 'Livraison Caraïbes',     sub: 'Martinique & Guadeloupe' },
-              { icon: 'fa-lock',                title: 'Paiement sécurisé',      sub: 'Stripe — Données protégées' },
+              { icon: 'fa-lock',                title: 'Paiement sécurisé',      sub: 'SumUp — Données protégées' },
               { icon: 'fa-gem',                 title: 'Artisanat authentique',  sub: 'Sélection directe artisans' },
               { icon: 'fa-rotate-left',         title: 'Retours 7 jours',        sub: 'Échanges simplifiés' },
             ].map((t, i) => (
