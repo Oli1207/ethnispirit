@@ -7,20 +7,18 @@ import { trackEventStandalone } from '../../hooks/useTracking';
 export default function PaymentSuccessScreen() {
   const [searchParams]        = useSearchParams();
   const oid                   = searchParams.get('oid');
-  const sessionId             = searchParams.get('session_id');
   const [order, setOrder]     = useState(null);
   const [loading, setLoading] = useState(true);
   const [verifyErr, setVerifyErr] = useState('');
 
   useEffect(() => {
-    if (!oid || !sessionId) { setLoading(false); return; }
-    // Léger délai pour laisser Stripe finaliser côté serveur
+    if (!oid) { setLoading(false); return; }
+    // Léger délai pour laisser SumUp finaliser côté serveur
     const timer = setTimeout(() => {
-      ordersAPI.verify(oid, sessionId)
+      ordersAPI.verify(oid)
         .then(({ data }) => {
           setOrder(data);
-          // On track l'achat seulement si le paiement est confirmé
-          if (!data._stripe_pending) {
+          if (!data._sumup_pending) {
             trackEventStandalone('purchase', {
               order_oid: data.oid,
               value:     parseFloat(data.total),
@@ -28,15 +26,13 @@ export default function PaymentSuccessScreen() {
           }
         })
         .catch((err) => {
-          // Si le serveur retourne une erreur structurée on l'affiche, sinon message générique discret
           const serverMsg = err.response?.data?.error;
           if (serverMsg) setVerifyErr(serverMsg);
-          // Erreur réseau ou 5xx non bloquante : on ne montre rien (le paiement est passé chez Stripe)
         })
         .finally(() => setLoading(false));
-    }, 800);
+    }, 1200);
     return () => clearTimeout(timer);
-  }, [oid, sessionId]);
+  }, [oid]);
 
   return (
     <div className="eth-confirm-page">

@@ -154,10 +154,14 @@ DEFAULT_FROM_EMAIL = 'support@ethnispirit.com'
 EMAIL_TIMEOUT      = 10
 EMAIL_USE_LOCALTIME = True
 
-# ── Stripe ────────────────────────────────────────────────────────────────────
-# Ces clés DOIVENT être définies dans le fichier .env (jamais en dur ici)
-STRIPE_SECRET_KEY      = env.str('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = env.str('STRIPE_PUBLISHABLE_KEY')
+# ── Stripe (conservé pour les anciennes commandes) ────────────────────────────
+STRIPE_SECRET_KEY      = env.str('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = env.str('STRIPE_PUBLISHABLE_KEY', default='')
+
+# ── SumUp ─────────────────────────────────────────────────────────────────────
+SUMUP_API_KEY       = env.str('SUMUP_API_KEY',       default='')
+SUMUP_MERCHANT_CODE = env.str('SUMUP_MERCHANT_CODE', default='')
+SUMUP_REDIRECT_URL  = env.str('SUMUP_REDIRECT_URL',  default='')
 
 # ── Web Push (VAPID) ──────────────────────────────────────────────────────────
 # Clé publique (base64url, 65 bytes non compressé P-256)

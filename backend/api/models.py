@@ -122,6 +122,21 @@ class ProductImage(models.Model):
         return f'Image — {self.product.name}'
 
 
+# ── Références produit ────────────────────────────────────────────────────────
+class ProductReference(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='references')
+    name    = models.CharField(max_length=100)
+    image   = models.ImageField(upload_to='references/', blank=True, null=True)
+    order   = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name_plural = 'Références produit'
+
+    def __str__(self):
+        return f'{self.name} — {self.product.name}'
+
+
 # ── Wishlist ──────────────────────────────────────────────────────────────────
 class Wishlist(models.Model):
     user    = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
@@ -207,6 +222,7 @@ class CartItem(models.Model):
     cart     = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product  = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    variant  = models.CharField(max_length=100, blank=True, default='')
 
     def __str__(self):
         return f'{self.product.name} x{self.quantity}'
@@ -295,11 +311,12 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order       = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product     = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    product_name = models.CharField(max_length=200)  # snapshot
+    order         = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product       = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_name  = models.CharField(max_length=200)   # snapshot
     product_price = models.DecimalField(max_digits=10, decimal_places=2)  # snapshot
-    quantity    = models.PositiveIntegerField(default=1)
+    quantity      = models.PositiveIntegerField(default=1)
+    variant       = models.CharField(max_length=100, blank=True, default='')
 
     @property
     def subtotal(self):

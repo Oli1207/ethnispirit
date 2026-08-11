@@ -395,7 +395,7 @@ export default function HomeScreen() {
               { icon: 'fa-truck-fast',          title: 'Livraison Caraïbes',     sub: 'Martinique & Guadeloupe' },
               { icon: 'fa-lock',                title: 'Paiement sécurisé',      sub: 'Stripe — Données protégées' },
               { icon: 'fa-gem',                 title: 'Artisanat authentique',  sub: 'Sélection directe artisans' },
-              { icon: 'fa-rotate-left',         title: 'Retours 14 jours',       sub: 'Échanges simplifiés' },
+              { icon: 'fa-rotate-left',         title: 'Retours 7 jours',        sub: 'Échanges simplifiés' },
             ].map((t, i) => (
               <div key={t.title} className="lp-trust-item" data-reveal data-delay={i > 0 ? String(i) : undefined}>
                 <i className={`fa-solid ${t.icon} lp-trust-icon`}></i>

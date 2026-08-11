@@ -115,7 +115,8 @@ export default function ProductDetailScreen() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishFeedback, setWishFeedback] = useState('');
   const [cartFeedback, setCartFeedback] = useState(false);
-  const [openSection, setOpenSection] = useState('description');
+  const [openSection, setOpenSection]   = useState('description');
+  const [selectedRef, setSelectedRef]   = useState(null);
   const [similar, setSimilar]         = useState([]);
   const [copied, setCopied]           = useState(false);
   const [prModalOpen, setPrModalOpen] = useState(false);
@@ -203,13 +204,13 @@ export default function ProductDetailScreen() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
   function handleAddToCart() {
-    addItem(product.id, qty);
+    addItem(product.id, qty, {}, selectedRef || '');
     setCartFeedback(true);
     setTimeout(() => setCartFeedback(false), 2500);
   }
 
   function handleBuyNow() {
-    addItem(product.id, qty);
+    addItem(product.id, qty, {}, selectedRef || '');
     navigate('/panier');
   }
 
@@ -489,6 +490,25 @@ export default function ProductDetailScreen() {
                 </div>
 
                 {/* ⑧ CTA principal */}
+                {product.references?.length > 0 && !selectedRef && (
+                  <p style={{ fontSize: 12, color: 'var(--tc-classic)', marginBottom: 8, fontWeight: 600 }}>
+                    <i className="fa-solid fa-swatchbook me-1"></i>
+                    Sélectionnez une référence ci-dessous
+                  </p>
+                )}
+                {selectedRef && (
+                  <p style={{ fontSize: 12, color: 'var(--text-mid)', marginBottom: 8 }}>
+                    <i className="fa-solid fa-check me-1" style={{ color: 'var(--tc-classic)' }}></i>
+                    Référence : <strong>{selectedRef}</strong>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRef(null)}
+                      style={{ marginLeft: 8, fontSize: 11, color: 'var(--text-light)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                    >
+                      Changer
+                    </button>
+                  </p>
+                )}
                 <button
                   className={`eth-pd-cta-primary ${cartFeedback ? 'added' : ''}`}
                   onClick={handleAddToCart}
@@ -588,7 +608,7 @@ export default function ProductDetailScreen() {
                 <i className="fa-solid fa-rotate-left"></i>
                 <div>
                   <strong>Retours gratuits</strong>
-                  <span>14 jours, produit non utilisé</span>
+                  <span>7 jours, produit non utilisé</span>
                 </div>
               </div>
               <div className="eth-pd-trust-item">
@@ -615,6 +635,61 @@ export default function ProductDetailScreen() {
                         </p>
                   ),
                 },
+                ...(product.references?.length > 0 ? [{
+                  id: 'references',
+                  icon: 'fa-swatchbook',
+                  label: `Références (${product.references.length})`,
+                  content: (
+                    <div>
+                      <p style={{ fontSize: 13, color: 'var(--text-mid)', marginBottom: 14 }}>
+                        Choisissez une référence avant d'ajouter au panier.
+                      </p>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 10 }}>
+                        {product.references.map(ref => (
+                          <button
+                            key={ref.id}
+                            type="button"
+                            onClick={() => setSelectedRef(selectedRef === ref.name ? null : ref.name)}
+                            style={{
+                              border: `2px solid ${selectedRef === ref.name ? 'var(--tc-classic)' : 'var(--sand)'}`,
+                              borderRadius: 10,
+                              background: selectedRef === ref.name ? 'rgba(198,93,59,.07)' : '#fff',
+                              padding: 0,
+                              cursor: 'pointer',
+                              overflow: 'hidden',
+                              transition: 'all .15s',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                            }}
+                          >
+                            {ref.image && (
+                              <img
+                                src={ref.image}
+                                alt={ref.name}
+                                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }}
+                              />
+                            )}
+                            <span style={{
+                              fontSize: 11, fontWeight: 600,
+                              color: selectedRef === ref.name ? 'var(--tc-classic)' : 'var(--text-mid)',
+                              padding: '6px 4px', textAlign: 'center', lineHeight: 1.3,
+                            }}>
+                              {selectedRef === ref.name && <i className="fa-solid fa-check me-1" style={{ fontSize: 9 }}></i>}
+                              {ref.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                      {selectedRef && (
+                        <p style={{ fontSize: 12, color: 'var(--tc-classic)', marginTop: 10, fontWeight: 600 }}>
+                          <i className="fa-solid fa-circle-check me-1"></i>
+                          Référence sélectionnée : {selectedRef}
+                        </p>
+                      )}
+                    </div>
+                  ),
+                }] : []),
                 {
                   id: 'caracteristiques',
                   icon: 'fa-list-check',
@@ -639,7 +714,7 @@ export default function ProductDetailScreen() {
                     <ul className="eth-specs-list">
                       <li><i className="fa-solid fa-map-location-dot"></i><span>Zones</span><strong>Martinique, Guadeloupe, Saint-Martin, Guyane, Réunion</strong></li>
                       <li><i className="fa-solid fa-clock"></i><span>Délai</span><strong>5 à 8 jours ouvrés après expédition</strong></li>
-                      <li><i className="fa-solid fa-rotate-left"></i><span>Retours</span><strong>Gratuits sous 14 jours, produit non utilisé</strong></li>
+                      <li><i className="fa-solid fa-rotate-left"></i><span>Retours</span><strong>Gratuits sous 7 jours, produit non utilisé</strong></li>
                       <li><i className="fa-solid fa-shield-halved"></i><span>Paiement</span><strong>Sécurisé par Stripe — CB, Apple Pay, Google Pay</strong></li>
                     </ul>
                   ),

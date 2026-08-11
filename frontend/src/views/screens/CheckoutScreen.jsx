@@ -307,7 +307,7 @@ export default function CheckoutScreen() {
                   </div>
                 )}
 
-                {/* Note Stripe */}
+                {/* Note SumUp */}
                 <div style={{
                   background: 'var(--cream)',
                   border: '1px solid var(--sand)',
@@ -322,8 +322,8 @@ export default function CheckoutScreen() {
                 }}>
                   <i className="fa-solid fa-shield-halved" style={{ color: 'var(--bio-main)', marginTop: 1, flexShrink: 0 }}></i>
                   <span>
-                    Vous serez redirigé(e) vers la page de paiement sécurisée <strong>Stripe</strong>.
-                    CB, Visa, Mastercard, Apple Pay &amp; Google Pay acceptés — chiffrement SSL, conforme 3DS2.
+                    Vous serez redirigé(e) vers la page de paiement sécurisée <strong>SumUp</strong>.
+                    CB, Visa, Mastercard acceptés — paiement 100 % sécurisé.
                   </span>
                 </div>
 
@@ -334,7 +334,7 @@ export default function CheckoutScreen() {
                   disabled={loading}
                 >
                   {loading ? (
-                    <><span className="spinner-border spinner-border-sm me-2"></span>Redirection vers Stripe…</>
+                    <><span className="spinner-border spinner-border-sm me-2"></span>Redirection vers SumUp…</>
                   ) : (
                     <><i className="fa-solid fa-lock me-2"></i>Payer {formatPrice(finalTotal)} en sécurité</>
                   )}
@@ -415,11 +415,11 @@ export default function CheckoutScreen() {
 
             <div className="eth-payment-note mt-3">
               <i className="fa-solid fa-shield-halved" style={{ color: 'var(--bio-main)' }}></i>
-              Paiement sécurisé <strong>Stripe</strong> — CB, Visa, Mastercard, Apple Pay
+              Paiement sécurisé <strong>SumUp</strong> — CB, Visa, Mastercard
             </div>
             <div className="eth-payment-note mt-2">
               <i className="fa-solid fa-rotate-left"></i>
-              Retours acceptés sous 14 jours
+              Retours acceptés sous 7 jours
             </div>
             <div className="eth-payment-note mt-2">
               <i className="fa-solid fa-truck-fast"></i>

@@ -23,9 +23,9 @@ const useCartStore = create((set, get) => ({
   },
 
   // ── Ajouter un article ────────────────────────────────────────────────────
-  addItem: (productId, quantity = 1, productMeta = {}) => {
+  addItem: (productId, quantity = 1, productMeta = {}, variant = '') => {
     set({ loading: true });
-    return cartAPI.add(productId, quantity)
+    return cartAPI.add(productId, quantity, variant)
       .then(({ data }) => {
         set({ cart: data, loading: false });
         trackEventStandalone('add_to_cart', {

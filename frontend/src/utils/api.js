@@ -47,11 +47,12 @@ export const cartAPI = {
   get: () =>
     axiosInstance.get('/api/cart/', { params: { cart_id: getCartId() } }),
 
-  add: (productId, quantity = 1) =>
+  add: (productId, quantity = 1, variant = '') =>
     axiosInstance.post('/api/cart/add/', {
       cart_id: getCartId(),
       product_id: productId,
       quantity,
+      ...(variant ? { variant } : {}),
     }),
 
   update: (itemId, quantity) =>
@@ -83,7 +84,7 @@ export const ordersAPI = {
     ...data,
     cart_id: getCartId(),
   }),
-  verify: (oid, sessionId) => axiosInstance.post(`/api/orders/${oid}/verify/`, { session_id: sessionId }),
+  verify: (oid) => axiosInstance.post(`/api/orders/${oid}/verify/`, {}),
 };
 
 // ── Avis produit ─────────────────────────────────────────────────────────────
@@ -127,6 +128,12 @@ export const adminAPI = {
   updateProduct: (id, fd)      => axiosInstance.patch(`/api/admin/products/${id}/update/`, fd),
   deleteProduct: (id)          => axiosInstance.delete(`/api/admin/products/${id}/delete/`),
   deleteImage:   (imgId)       => axiosInstance.delete(`/api/admin/products/images/${imgId}/delete/`),
+
+  // Références produit
+  getReferences:    (productId)      => axiosInstance.get(`/api/admin/products/${productId}/references/`),
+  createReference:  (productId, fd)  => axiosInstance.post(`/api/admin/products/${productId}/references/`, fd),
+  updateReference:  (refId, fd)      => axiosInstance.patch(`/api/admin/products/references/${refId}/`, fd),
+  deleteReference:  (refId)          => axiosInstance.delete(`/api/admin/products/references/${refId}/`),
 
   // Catégories
   createCategory: (fd)         => axiosInstance.post('/api/admin/categories/create/', fd),

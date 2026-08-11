@@ -74,6 +74,8 @@ urlpatterns = [
     path('admin/products/<int:product_id>/update/',   views.admin_product_update,         name='admin_product_update'),
     path('admin/products/<int:product_id>/delete/',   views.admin_product_delete,         name='admin_product_delete'),
     path('admin/products/images/<int:image_id>/delete/', views.admin_product_image_delete, name='admin_product_image_delete'),
+    path('admin/products/<int:product_id>/references/',  views.admin_product_references,       name='admin_product_references'),
+    path('admin/products/references/<int:ref_id>/',      views.admin_product_reference_detail, name='admin_product_reference_detail'),
 
     # Admin — CRUD Catégories
     path('admin/categories/create/',                  views.admin_category_create,        name='admin_category_create'),

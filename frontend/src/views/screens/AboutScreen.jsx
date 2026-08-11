@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
+import aboutImg from '../../assets/afrique_invite.jpeg';
 
 export default function AboutScreen() {
   return (
@@ -16,12 +17,21 @@ export default function AboutScreen() {
           <div>
             <p className="eth-about-eyebrow">Notre histoire</p>
             <h1 className="eth-about-title">
-              L'artisanat africain<br />au cœur des <em>Caraïbes</em>
+              L'Afrique au cœur<br />de la <em>Caraïbe</em>
             </h1>
             <p className="eth-about-lead">
-              EthniSpirit est née d'une passion pour le savoir-faire africain et
-              d'une volonté de partager cette richesse culturelle avec les
-              communautés caribéennes de Martinique et Guadeloupe.
+              Chez Ethnispirit, nous sélectionnons avec passion des pièces artisanales
+              authentiques venues d'Afrique, pensées pour séduire une clientèle caribéenne
+              attachée à ses racines, à son histoire et à son identité culturelle.
+            </p>
+            <p className="eth-about-lead" style={{ marginTop: 16 }}>
+              Chaque création est choisie pour son authenticité, la qualité de son
+              artisanat et sa résonance avec l'âme et la sensibilité des Caribéens.
+            </p>
+            <p className="eth-about-lead" style={{ marginTop: 16 }}>
+              Plus qu'une boutique, Ethnispirit est une invitation à renouer avec un
+              héritage culturel, à valoriser l'artisanat africain et à faire entrer chez
+              vous des créations porteuses d'histoire, d'élégance et d'émotion.
             </p>
             <div style={{ display: 'flex', gap: 14, marginTop: 32, flexWrap: 'wrap' }}>
               <Link to="/catalogue" className="btn-hero-main">
@@ -35,8 +45,8 @@ export default function AboutScreen() {
           </div>
           <div className="eth-about-hero-img">
             <img
-              src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=700&q=80"
-              alt="Artisanat africain"
+              src={aboutImg}
+              alt="L'Afrique s'invite chez vous — EthniSpirit"
             />
           </div>
         </div>

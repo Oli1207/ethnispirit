@@ -1,7 +1,7 @@
 from django.db.models import Avg, Sum
 from rest_framework import serializers
 from .models import (
-    Category, Subcategory, Product, ProductImage,
+    Category, Subcategory, Product, ProductImage, ProductReference,
     Wishlist, PromoCode, Cart, CartItem,
     Order, OrderItem, NewsletterSubscriber, ProductReview, ShippingZone,
 )
@@ -49,8 +49,15 @@ class ProductListSerializer(serializers.ModelSerializer):
         )
 
 
+class ProductReferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = ProductReference
+        fields = ('id', 'name', 'image', 'order')
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     images           = ProductImageSerializer(many=True, read_only=True)
+    references       = ProductReferenceSerializer(many=True, read_only=True)
     main_image       = serializers.ReadOnlyField()
     discount_percent = serializers.ReadOnlyField()
     category         = CategorySerializer(read_only=True)
@@ -77,7 +84,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'uid', 'name', 'slug', 'description', 'origin',
             'price', 'old_price', 'discount_percent', 'main_image', 'images',
-            'stock', 'is_featured', 'certification', 'category', 'date',
+            'references', 'stock', 'is_featured', 'certification', 'category', 'date',
             'sold_count', 'avg_rating', 'review_count',
         )
 
@@ -98,7 +105,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = CartItem
-        fields = ('id', 'product', 'quantity', 'subtotal')
+        fields = ('id', 'product', 'quantity', 'subtotal', 'variant')
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -138,7 +145,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = OrderItem
-        fields = ('id', 'product_name', 'product_price', 'quantity', 'subtotal')
+        fields = ('id', 'product_name', 'product_price', 'quantity', 'subtotal', 'variant')
 
 
 class OrderSerializer(serializers.ModelSerializer):

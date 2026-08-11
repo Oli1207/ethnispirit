@@ -171,12 +171,13 @@ function CategoryModal({ category, allCategories, onClose, onSaved }) {
 
   async function save() {
     if (!form.name.trim()) return setError('Le nom est requis.');
-    if (form.order === null || form.order === '') return setError('Choisissez une position d\'affichage.');
     setError('');
     setSaving(true);
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => { if (v !== null) fd.append(k, v); });
+      Object.entries(form).forEach(([k, v]) => {
+        if (v !== null && v !== '') fd.append(k, v);
+      });
       if (imageFile) fd.append('image', imageFile);
 
       // 1. Sauvegarder la catégorie courante
@@ -267,9 +268,21 @@ function CategoryModal({ category, allCategories, onClose, onSaved }) {
 
           {/* Position d'affichage — sélecteur visuel */}
           <div style={{ marginBottom: 16 }}>
-            <label className="eth-form-label" style={{ marginBottom: 10, display: 'block' }}>
-              Position sur la page d'accueil *
-            </label>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <label className="eth-form-label" style={{ margin: 0 }}>
+                Position sur la page d'accueil
+                <span style={{ color: 'var(--text-light)', fontSize: 12, fontWeight: 400, marginLeft: 6 }}>optionnel</span>
+              </label>
+              {form.order !== null && (
+                <button
+                  type="button"
+                  onClick={() => set('order', null)}
+                  style={{ fontSize: 11, color: 'var(--text-light)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                >
+                  Ne pas afficher
+                </button>
+              )}
+            </div>
             <SlotPicker
               value={form.order}
               universe={form.universe}

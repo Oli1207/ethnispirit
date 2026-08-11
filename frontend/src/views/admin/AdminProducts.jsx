@@ -256,6 +256,121 @@ function Toggle({ checked, onChange }) {
   );
 }
 
+// ── Panneau Références produit (en mode édition uniquement) ──────────────────
+function ReferencesPanel({ productId }) {
+  const [refs,       setRefs]       = useState([]);
+  const [newName,    setNewName]    = useState('');
+  const [newFile,    setNewFile]    = useState(null);
+  const [preview,    setPreview]    = useState(null);
+  const [adding,     setAdding]     = useState(false);
+  const [error,      setError]      = useState('');
+  const fileRef = useRef();
+
+  useEffect(() => {
+    adminAPI.getReferences(productId)
+      .then(({ data }) => setRefs(data))
+      .catch(() => {});
+  }, [productId]);
+
+  function pickFile(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    setNewFile(f);
+    const r = new FileReader();
+    r.onload = ev => setPreview(ev.target.result);
+    r.readAsDataURL(f);
+    e.target.value = '';
+  }
+
+  async function handleAdd() {
+    if (!newName.trim()) { setError('Nom requis.'); return; }
+    setError(''); setAdding(true);
+    try {
+      const fd = new FormData();
+      fd.append('name', newName.trim());
+      fd.append('order', refs.length);
+      if (newFile) fd.append('image', newFile);
+      const { data } = await adminAPI.createReference(productId, fd);
+      setRefs(prev => [...prev, data]);
+      setNewName(''); setNewFile(null); setPreview(null);
+    } catch { setError('Erreur lors de l\'ajout.'); }
+    finally { setAdding(false); }
+  }
+
+  async function handleDelete(refId) {
+    try {
+      await adminAPI.deleteReference(refId);
+      setRefs(prev => prev.filter(r => r.id !== refId));
+    } catch { setError('Erreur lors de la suppression.'); }
+  }
+
+  return (
+    <div style={{ gridColumn: '1/-1', marginTop: 4 }}>
+      <label className="eth-form-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <i className="fa-solid fa-swatchbook" style={{ color: 'var(--tc-classic)', fontSize: 13 }}></i>
+        Références ({refs.length})
+        <span style={{ fontSize: 11, color: 'var(--text-light)', fontWeight: 400 }}>— options de variante affichées sur la fiche produit</span>
+      </label>
+
+      {/* Liste */}
+      {refs.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+          {refs.map(ref => (
+            <div key={ref.id} style={{ position: 'relative', border: '1px solid var(--sand)', borderRadius: 8, overflow: 'hidden', width: 80, flexShrink: 0 }}>
+              {ref.image
+                ? <img src={ref.image} alt={ref.name} style={{ width: 80, height: 64, objectFit: 'cover', display: 'block' }} />
+                : <div style={{ width: 80, height: 64, background: 'var(--cream)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fa-solid fa-image" style={{ color: 'var(--text-light)', fontSize: 18 }}></i>
+                  </div>
+              }
+              <div style={{ padding: '4px 6px', fontSize: 10, fontWeight: 600, color: 'var(--text-mid)', textAlign: 'center', lineHeight: 1.2 }}>{ref.name}</div>
+              <button
+                onClick={() => handleDelete(ref.id)}
+                style={{ position: 'absolute', top: 3, right: 3, width: 18, height: 18, borderRadius: '50%', background: '#EF4444', border: 'none', color: '#fff', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Formulaire ajout */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 140 }}>
+          <input
+            className="form-control eth-input"
+            placeholder="Nom de la référence (ex: Or, Argent…)"
+            value={newName}
+            onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+            style={{ fontSize: 13 }}
+          />
+        </div>
+        <div>
+          {preview
+            ? <img src={preview} alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: 6, border: '1px dashed var(--tc-classic)', cursor: 'pointer' }} onClick={() => fileRef.current.click()} />
+            : <button type="button" onClick={() => fileRef.current.click()} style={{ width: 38, height: 38, border: '1.5px dashed var(--sand)', borderRadius: 6, background: 'var(--cream)', cursor: 'pointer', color: 'var(--text-light)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="fa-solid fa-image"></i>
+              </button>
+          }
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={pickFile} />
+        </div>
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={adding}
+          className="btn-eth-primary"
+          style={{ padding: '8px 16px', fontSize: 13 }}
+        >
+          {adding ? <span className="spinner-border spinner-border-sm"></span> : <><i className="fa-solid fa-plus me-1"></i>Ajouter</>}
+        </button>
+      </div>
+      {error && <p style={{ fontSize: 12, color: '#B91C1C', marginTop: 6 }}>{error}</p>}
+    </div>
+  );
+}
+
 // ── Modal Produit ─────────────────────────────────────────────────────────────
 function ProductModal({ product, categories, onClose, onSaved }) {
   const isEdit        = Boolean(product);
@@ -535,6 +650,10 @@ function ProductModal({ product, categories, onClose, onSaved }) {
                 La première image sera l'image principale. Formats JPG, PNG, WebP.
               </p>
             </div>
+
+            {/* Références — uniquement en mode édition */}
+            {isEdit && <ReferencesPanel productId={product.id} />}
+
           </div>
         </div>
 

@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 from .throttles import PromoCheckThrottle
 from .models import (
-    Category, Product, ProductImage, Wishlist, PromoCode,
+    Category, Product, ProductImage, ProductReference, Wishlist, PromoCode,
     Cart, CartItem, Order, OrderItem, NewsletterSubscriber, ProductReview, ShippingZone,
     ContactMessage, AnalyticsSession, AnalyticsEvent, WelcomePromoSettings,
     StockAlertSettings, RestockNotification, ProductRequest,
@@ -17,7 +17,7 @@ from .models import (
 )
 from .serializers import (
     CategorySerializer, CategoryWriteSerializer,
-    ProductListSerializer, ProductDetailSerializer,
+    ProductListSerializer, ProductDetailSerializer, ProductReferenceSerializer,
     AdminProductSerializer, ProductWriteSerializer,
     WishlistSerializer, CartSerializer, CartItemSerializer,
     OrderSerializer, OrderCreateSerializer,
@@ -126,6 +126,7 @@ def cart_add(request):
     cart_id    = request.data.get('cart_id')
     product_id = request.data.get('product_id')
     quantity   = int(request.data.get('quantity', 1))
+    variant    = request.data.get('variant', '')
 
     if not cart_id or not product_id:
         return Response({'error': 'cart_id et product_id requis.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -136,7 +137,7 @@ def cart_add(request):
         return Response({'error': 'Produit introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
     cart = _get_or_create_cart(cart_id)
-    item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    item, created = CartItem.objects.get_or_create(cart=cart, product=product, variant=variant)
     if not created:
         item.quantity += quantity
     else:
@@ -502,19 +503,23 @@ def order_create(request):
                 product_name  = ci.product.name,
                 product_price = ci.product.price,
                 quantity      = ci.quantity,
+                variant       = ci.variant,
             )
 
-    # Création de la Stripe Checkout Session
+    # Création du checkout SumUp
+    from . import sumup
+    from django.conf import settings as django_settings
     try:
-        session = stripe_service.create_checkout_session(order)
-        order.stripe_session_id = session.id
-        order.save(update_fields=['stripe_session_id'])
-        checkout_url = session.url
+        redirect_url = f"{django_settings.FRONTEND_URL}/paiement-reussi?oid={order.oid}"
+        checkout     = sumup.create_checkout(order, redirect_url=redirect_url)
+        checkout_id  = checkout['id']
+        checkout_url = checkout['hosted_checkout_url']
+        order.sumup_checkout_id = checkout_id
+        order.save(update_fields=['sumup_checkout_id'])
     except Exception as e:
-        # Stripe a échoué — on annule l'ordre pour ne pas laisser d'orphelin
         order.delete()
         return Response(
-            {'error': f'Impossible d\'initialiser le paiement Stripe : {str(e)}'},
+            {'error': f'Impossible d\'initialiser le paiement SumUp : {str(e)}'},
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
@@ -542,61 +547,49 @@ def order_create(request):
 @permission_classes([AllowAny])
 def order_payment_verify(request, oid):
     """
-    Appelé depuis PaymentSuccessScreen avec session_id.
-    Vérifie la Stripe Checkout Session et marque la commande payée si besoin.
-
-    Architecture : appel Stripe AVANT la transaction DB pour éviter de tenir
-    une connexion PostgreSQL verrouillée pendant une requête réseau externe.
+    Appelé depuis PaymentSuccessScreen après redirection SumUp.
+    Vérifie le statut du checkout SumUp et marque la commande payée si besoin.
     """
-    session_id = request.data.get('session_id')
-
-    if not session_id:
-        return Response({'error': 'session_id requis.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    # ── 1. Vérifier que la commande existe (lecture seule, pas de verrou) ──────
+    # ── 1. Vérifier que la commande existe ────────────────────────────────────
     try:
         order = Order.objects.prefetch_related('items').get(oid=oid)
     except Order.DoesNotExist:
         return Response({'error': 'Commande introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Déjà payée — retourner immédiatement sans appeler Stripe
+    # Déjà payée — retourner immédiatement
     if order.status == 'paid':
         return Response(OrderSerializer(order).data)
 
-    # ── 2. Appel Stripe HORS transaction (évite de bloquer la connexion DB) ───
+    if not order.sumup_checkout_id:
+        return Response({'error': 'Checkout SumUp introuvable.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ── 2. Appel SumUp HORS transaction ──────────────────────────────────────
+    from . import sumup
     try:
-        session = stripe_service.retrieve_session(session_id)
+        checkout = sumup.get_checkout(order.sumup_checkout_id)
     except Exception:
-        # Stripe inaccessible : retourner la commande telle quelle.
-        # Le webhook Stripe (ou une nouvelle tentative) mettra à jour le statut.
         return Response({
             **OrderSerializer(order).data,
-            '_stripe_pending': True,
+            '_sumup_pending': True,
         })
 
-    # ── 3. Vérification anti-fraude ───────────────────────────────────────────
-    # Stripe SDK 8.x : metadata est un StripeObject, pas un dict → utiliser getattr
-    if getattr(session.metadata, 'order_oid', None) != order.oid:
-        return Response(
-            {'error': 'Session de paiement invalide pour cette commande.'},
-            status=status.HTTP_403_FORBIDDEN,
-        )
+    sumup_status = checkout.get('status', '')
 
-    if session.payment_status != 'paid':
-        if session.payment_status == 'unpaid':
-            return Response({
-                **OrderSerializer(order).data,
-                '_stripe_pending': True,
-            })
+    if sumup_status == 'PAID':
+        pass  # → continuer vers mise à jour DB
+    elif sumup_status in ('PENDING', 'PROCESSING'):
+        return Response({
+            **OrderSerializer(order).data,
+            '_sumup_pending': True,
+        })
+    else:
+        # FAILED, EXPIRED, etc.
         return Response({'error': 'Paiement annulé ou invalide.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ── 4. Mise à jour DB dans une transaction courte (pas d'appel réseau dedans) ──
-    # IMPORTANT : select_for_update() est incompatible avec prefetch_related() sous
-    # Django 5.x (TypeError). On recharge sans prefetch, puis on itère items séparément.
+    # ── 3. Mise à jour DB ────────────────────────────────────────────────────
     with transaction.atomic():
         order = Order.objects.select_for_update().get(oid=oid)
         if order.status == 'paid':
-            # Une autre requête parallèle a déjà traité le paiement
             order_full = Order.objects.prefetch_related('items').get(oid=oid)
             return Response(OrderSerializer(order_full).data)
 
@@ -610,9 +603,8 @@ def order_payment_verify(request, oid):
                 )
                 _check_stock_alert(item.product_id)
 
-    # Email et sérialisation hors transaction
+    # Email et push hors transaction
     _send_order_confirmation_email(order)
-    # Push notification — paiement confirmé
     try:
         from .push_utils import send_push_to_staff
         universe = None
@@ -623,7 +615,7 @@ def order_payment_verify(request, oid):
         send_push_to_staff(
             title='💳 Paiement confirmé',
             body=f'Commande {order.oid} payée — {order.full_name} — {order.total} €',
-            url=f'/admin-dashboard/commandes',
+            url='/admin-dashboard/commandes',
             universe=universe,
             event_type='payment_confirmed',
         )
@@ -1053,6 +1045,58 @@ def admin_product_image_delete(request, image_id):
             first.is_main = True
             first.save(update_fields=['is_main'])
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ── Admin — Références produit ───────────────────────────────────────────────
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+def admin_product_references(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return Response({'error': 'Produit introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        refs = product.references.all()
+        return Response(ProductReferenceSerializer(refs, many=True, context={'request': request}).data)
+
+    # POST — créer une référence
+    name  = request.data.get('name', '').strip()
+    order = int(request.data.get('order', product.references.count()))
+    if not name:
+        return Response({'error': 'Le nom est requis.'}, status=status.HTTP_400_BAD_REQUEST)
+    ref = ProductReference(product=product, name=name, order=order)
+    if 'image' in request.FILES:
+        ref.image = request.FILES['image']
+    ref.save()
+    return Response(ProductReferenceSerializer(ref, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_product_reference_detail(request, ref_id):
+    try:
+        ref = ProductReference.objects.select_related('product').get(id=ref_id)
+    except ProductReference.DoesNotExist:
+        return Response({'error': 'Référence introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'DELETE':
+        if ref.image:
+            ref.image.delete(save=False)
+        ref.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # PATCH
+    if 'name' in request.data:
+        ref.name = request.data['name'].strip()
+    if 'order' in request.data:
+        ref.order = int(request.data['order'])
+    if 'image' in request.FILES:
+        if ref.image:
+            ref.image.delete(save=False)
+        ref.image = request.FILES['image']
+    ref.save()
+    return Response(ProductReferenceSerializer(ref, context={'request': request}).data)
 
 
 # ── Admin — CRUD Catégories ───────────────────────────────────────────────────
