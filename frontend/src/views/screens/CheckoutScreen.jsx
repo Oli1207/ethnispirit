@@ -131,7 +131,7 @@ export default function CheckoutScreen() {
       });
 
       if (data.checkout_url) {
-        // On vide le panier seulement au moment de quitter vers Stripe
+        // On vide le panier seulement au moment de quitter vers SumUp
         clearCart();
         window.location.href = data.checkout_url;
       } else {
