@@ -77,7 +77,7 @@ export default function AboutScreen() {
             <img
               src={missionImg}
               alt="Mode africaine"
-              style={{ borderRadius: 'var(--r-lg)', height: 420, objectFit: 'cover' }}
+              style={{ borderRadius: 'var(--r-lg)', width: '100%', aspectRatio: '1080 / 427', objectFit: 'cover' }}
             />
           </div>
           <div className="eth-about-mission-text">
