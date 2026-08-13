@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
 import aboutImg from '../../assets/afrique_invite.jpeg';
+import missionImg from '../../assets/notre_mission.jpeg';
 
 export default function AboutScreen() {
   return (
@@ -74,7 +75,7 @@ export default function AboutScreen() {
         <div className="eth-about-mission-inner">
           <div className="eth-about-mission-img">
             <img
-              src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&q=80"
+              src={missionImg}
               alt="Mode africaine"
               style={{ borderRadius: 'var(--r-lg)', height: 420, objectFit: 'cover' }}
             />
