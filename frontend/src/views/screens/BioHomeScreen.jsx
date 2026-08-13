@@ -425,7 +425,7 @@ export default function BioHomeScreen() {
           <div className="blp-trust-bar">
             {[
               { icon: 'fa-leaf',        title: '100% Naturel',       sub: 'Ingrédients d\'origine végétale' },
-              { icon: 'fa-lock',        title: 'Paiement sécurisé',  sub: 'Stripe — Données protégées' },
+              { icon: 'fa-lock',        title: 'Paiement sécurisé',  sub: 'SumUp' },
               { icon: 'fa-truck-fast',  title: 'Livraison aux Caraïbes', sub: 'Martinique & Guadeloupe' },
               { icon: 'fa-rotate-left', title: 'Retours 30 jours',   sub: 'Satisfait ou remboursé' },
             ].map((t, i) => (

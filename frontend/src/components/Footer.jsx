@@ -102,7 +102,7 @@ export default function Footer() {
           )}
           <div className="eth-footer-pay">
             <span className="eth-pay-badge">
-              <i className="fa-brands fa-stripe me-1"></i>Stripe
+              <i className="fa-solid fa-credit-card me-1"></i>SumUp
             </span>
             <span className="eth-pay-badge">
               <i className="fa-solid fa-shield-halved me-1"></i>Sécurisé

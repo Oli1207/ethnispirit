@@ -615,7 +615,7 @@ export default function ProductDetailScreen() {
                 <i className="fa-solid fa-shield-halved"></i>
                 <div>
                   <strong>Paiement sécurisé</strong>
-                  <span>Stripe — CB, Apple Pay, 3DS2</span>
+                  <span>SumUp</span>
                 </div>
               </div>
             </div>
@@ -715,7 +715,7 @@ export default function ProductDetailScreen() {
                       <li><i className="fa-solid fa-map-location-dot"></i><span>Zones</span><strong>Martinique, Guadeloupe, Saint-Martin, Guyane, Réunion</strong></li>
                       <li><i className="fa-solid fa-clock"></i><span>Délai</span><strong>5 à 8 jours ouvrés après expédition</strong></li>
                       <li><i className="fa-solid fa-rotate-left"></i><span>Retours</span><strong>Gratuits sous 7 jours, produit non utilisé</strong></li>
-                      <li><i className="fa-solid fa-shield-halved"></i><span>Paiement</span><strong>Sécurisé par Stripe — CB, Apple Pay, Google Pay</strong></li>
+                      <li><i className="fa-solid fa-shield-halved"></i><span>Paiement</span><strong>Sécurisé par SumUp</strong></li>
                     </ul>
                   ),
                 },

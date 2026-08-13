@@ -350,7 +350,7 @@ export default function CartScreen() {
 
             <div className="eth-payment-note mt-3">
               <i className="fa-solid fa-shield-halved"></i>
-              Paiement sécurisé via <strong>Stripe</strong> — CB, Apple Pay, Google Pay
+              Paiement sécurisé via <strong>SumUp</strong>
             </div>
           </div>
         </div>

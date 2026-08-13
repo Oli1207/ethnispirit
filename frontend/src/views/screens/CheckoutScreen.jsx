@@ -140,7 +140,7 @@ export default function CheckoutScreen() {
         navigate(`/paiement-succes?oid=${data.oid}`);
       }
     } catch (err) {
-      // Erreur Stripe (502) ou autre
+      // Erreur SumUp (502) ou autre
       const msg = err.response?.data?.error || 'Une erreur est survenue. Veuillez réessayer.';
       setError(msg);
       setLoading(false);

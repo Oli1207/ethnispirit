@@ -24,11 +24,11 @@ const FAQS = [
     items: [
       {
         q: 'Comment puis-je payer ?',
-        a: 'Nous acceptons les paiements par carte bancaire (Visa, Mastercard), Apple Pay et Google Pay via notre partenaire sécurisé Stripe. Vos données bancaires ne sont jamais stockées sur notre site.',
+        a: 'Nous acceptons les paiements par carte bancaire via notre partenaire sécurisé SumUp. Vos données bancaires ne sont jamais stockées sur notre site.',
       },
       {
         q: 'Mon paiement est-il sécurisé ?',
-        a: 'Absolument. Stripe est certifié PCI-DSS niveau 1 (le plus élevé). Toutes les transactions sont chiffrées via SSL/TLS et protégées par l\'authentification forte 3D Secure 2.',
+        a: 'Absolument. SumUp est certifié PCI-DSS. Toutes les transactions sont chiffrées via SSL/TLS et protégées par l\'authentification forte 3D Secure 2.',
       },
     ],
   },

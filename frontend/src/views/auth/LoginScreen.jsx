@@ -46,7 +46,7 @@ export default function LoginScreen() {
           </p>
           <div className="eth-auth-left-features">
             {[
-              { icon: 'fa-shield-halved',  text: 'Paiement sécurisé Stripe' },
+              { icon: 'fa-shield-halved',  text: 'Paiement sécurisé SumUp' },
               { icon: 'fa-truck-fast',     text: 'Livraison 5–8 jours ouvrés' },
               { icon: 'fa-gem',            text: 'Artisanat 100 % authentique' },
             ].map((f) => (

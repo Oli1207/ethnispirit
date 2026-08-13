@@ -32,7 +32,7 @@ export default function Navbar() {
         <span className="sep">|</span>
         <div className="eth-top-bar-item">
           <i className="fa-solid fa-shield-halved"></i>
-          Paiement sécurisé Stripe
+          Paiement sécurisé SumUp
         </div>
         <span className="sep">|</span>
         <div className="eth-top-bar-item">

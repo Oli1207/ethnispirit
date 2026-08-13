@@ -12,7 +12,7 @@ const SECTIONS = [
   {
     icon: 'fa-credit-card',
     title: '3. Paiement',
-    text: `Les paiements sont traités par Stripe, certifié PCI-DSS niveau 1. Nous ne stockons aucune donnée bancaire sur nos serveurs. Toutes les transactions sont chiffrées via SSL/TLS et sécurisées par l'authentification forte 3D Secure 2.`,
+    text: `Les paiements sont traités par SumUp, certifié PCI-DSS. Nous ne stockons aucune donnée bancaire sur nos serveurs. Toutes les transactions sont chiffrées via SSL/TLS et sécurisées par l'authentification forte 3D Secure 2.`,
   },
   {
     icon: 'fa-cookie-bite',
