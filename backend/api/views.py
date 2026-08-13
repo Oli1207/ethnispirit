@@ -510,7 +510,7 @@ def order_create(request):
     from . import sumup
     from django.conf import settings as django_settings
     try:
-        redirect_url = f"{django_settings.FRONTEND_URL}/paiement-reussi?oid={order.oid}"
+        redirect_url = f"{django_settings.FRONTEND_URL}/paiement-succes?oid={order.oid}"
         checkout     = sumup.create_checkout(order, redirect_url=redirect_url)
         checkout_id  = checkout['id']
         checkout_url = checkout['hosted_checkout_url']

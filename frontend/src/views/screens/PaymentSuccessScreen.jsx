@@ -10,6 +10,7 @@ export default function PaymentSuccessScreen() {
   const [order, setOrder]     = useState(null);
   const [loading, setLoading] = useState(true);
   const [verifyErr, setVerifyErr] = useState('');
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (!oid) { setLoading(false); return; }
@@ -18,7 +19,9 @@ export default function PaymentSuccessScreen() {
       ordersAPI.verify(oid)
         .then(({ data }) => {
           setOrder(data);
-          if (!data._sumup_pending) {
+          if (data._sumup_pending) {
+            setPending(true);
+          } else {
             trackEventStandalone('purchase', {
               order_oid: data.oid,
               value:     parseFloat(data.total),
@@ -27,26 +30,49 @@ export default function PaymentSuccessScreen() {
         })
         .catch((err) => {
           const serverMsg = err.response?.data?.error;
-          if (serverMsg) setVerifyErr(serverMsg);
+          setVerifyErr(serverMsg || 'Le paiement n\'a pas pu être confirmé.');
         })
         .finally(() => setLoading(false));
     }, 1200);
     return () => clearTimeout(timer);
   }, [oid]);
 
+  const failed = !loading && !!verifyErr;
+
   return (
     <div className="eth-confirm-page">
       <div className="eth-confirm-card">
 
-        {/* Icône succès */}
-        <div className="eth-confirm-icon-wrap eth-confirm-icon-success">
-          <i className="fa-solid fa-circle-check"></i>
+        {/* Icône — reflète le vrai statut du paiement */}
+        <div className={`eth-confirm-icon-wrap ${failed ? 'eth-confirm-icon-fail' : 'eth-confirm-icon-success'}`}>
+          <i className={`fa-solid ${loading ? 'fa-spinner fa-spin' : failed ? 'fa-circle-xmark' : 'fa-circle-check'}`}></i>
         </div>
 
-        <h2 className="eth-confirm-title">Paiement confirmé</h2>
-        <p className="eth-confirm-sub">
-          Merci pour votre commande. Vous recevrez un email de confirmation avec le suivi de votre colis.
-        </p>
+        {loading ? (
+          <>
+            <h2 className="eth-confirm-title">Vérification du paiement…</h2>
+            <p className="eth-confirm-sub">Merci de patienter un instant.</p>
+          </>
+        ) : failed ? (
+          <>
+            <h2 className="eth-confirm-title">Paiement non abouti</h2>
+            <p className="eth-confirm-sub">{verifyErr}</p>
+          </>
+        ) : pending ? (
+          <>
+            <h2 className="eth-confirm-title">Paiement en cours de traitement</h2>
+            <p className="eth-confirm-sub">
+              Nous confirmons votre paiement avec notre prestataire. Vous recevrez un email dès que c'est validé.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="eth-confirm-title">Paiement confirmé</h2>
+            <p className="eth-confirm-sub">
+              Merci pour votre commande. Vous recevrez un email de confirmation avec le suivi de votre colis.
+            </p>
+          </>
+        )}
 
         {/* Spinner pendant vérification */}
         {loading && (
@@ -55,16 +81,8 @@ export default function PaymentSuccessScreen() {
           </div>
         )}
 
-        {/* Erreur de vérification (non bloquante — le paiement est quand même passé) */}
-        {!loading && verifyErr && (
-          <div className="eth-inline-error mb-3" style={{ fontSize: 13 }}>
-            <i className="fa-solid fa-circle-info me-2"></i>
-            {verifyErr}
-          </div>
-        )}
-
         {/* Référence commande */}
-        {!loading && oid && (
+        {!loading && !failed && oid && (
           <div className="eth-confirm-ref">
             <i className="fa-solid fa-receipt" style={{ color: 'var(--tc-classic)' }}></i>
             <span>Référence :</span>
@@ -102,33 +120,50 @@ export default function PaymentSuccessScreen() {
         )}
 
         {/* Infos livraison */}
-        <div style={{
-          background: 'var(--cream)',
-          borderRadius: 'var(--r-md)',
-          padding: '14px 18px',
-          marginBottom: 8,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 13 }}>
-            <i className="fa-solid fa-truck-fast" style={{ color: 'var(--tc-classic)', width: 16 }}></i>
-            <span style={{ color: 'var(--text-mid)' }}>
-              Livraison estimée en <strong style={{ color: 'var(--text-dark)' }}>5 à 8 jours ouvrés</strong>
-            </span>
+        {!loading && !failed && (
+          <div style={{
+            background: 'var(--cream)',
+            borderRadius: 'var(--r-md)',
+            padding: '14px 18px',
+            marginBottom: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, fontSize: 13 }}>
+              <i className="fa-solid fa-truck-fast" style={{ color: 'var(--tc-classic)', width: 16 }}></i>
+              <span style={{ color: 'var(--text-mid)' }}>
+                Livraison estimée en <strong style={{ color: 'var(--text-dark)' }}>5 à 8 jours ouvrés</strong>
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+              <i className="fa-solid fa-envelope" style={{ color: 'var(--tc-classic)', width: 16 }}></i>
+              <span style={{ color: 'var(--text-mid)' }}>Un email de confirmation vous a été envoyé</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-            <i className="fa-solid fa-envelope" style={{ color: 'var(--tc-classic)', width: 16 }}></i>
-            <span style={{ color: 'var(--text-mid)' }}>Un email de confirmation vous a été envoyé</span>
-          </div>
-        </div>
+        )}
 
         {/* Actions */}
-        <div className="eth-confirm-actions">
-          <Link to="/compte" className="btn-eth-outline" style={{ padding: '11px 24px' }}>
-            <i className="fa-solid fa-bag-shopping me-2"></i>Mes commandes
-          </Link>
-          <Link to="/" className="btn-eth-primary" style={{ padding: '11px 24px' }}>
-            <i className="fa-solid fa-house me-2"></i>Retour à l'accueil
-          </Link>
-        </div>
+        {!loading && (
+          <div className="eth-confirm-actions">
+            {failed ? (
+              <>
+                <Link to="/panier" className="btn-eth-outline" style={{ padding: '11px 24px' }}>
+                  <i className="fa-solid fa-cart-shopping me-2"></i>Retour au panier
+                </Link>
+                <Link to="/" className="btn-eth-primary" style={{ padding: '11px 24px' }}>
+                  <i className="fa-solid fa-house me-2"></i>Retour à l'accueil
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/compte" className="btn-eth-outline" style={{ padding: '11px 24px' }}>
+                  <i className="fa-solid fa-bag-shopping me-2"></i>Mes commandes
+                </Link>
+                <Link to="/" className="btn-eth-primary" style={{ padding: '11px 24px' }}>
+                  <i className="fa-solid fa-house me-2"></i>Retour à l'accueil
+                </Link>
+              </>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
