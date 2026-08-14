@@ -260,6 +260,11 @@ function Toggle({ checked, onChange }) {
 function ReferencesPanel({ productId }) {
   const [refs,       setRefs]       = useState([]);
   const [newName,    setNewName]    = useState('');
+  const [newColor,   setNewColor]   = useState('');
+  const [newSize,    setNewSize]    = useState('');
+  const [newMaterial,setNewMaterial]= useState('');
+  const [newPrice,   setNewPrice]   = useState('');
+  const [newStock,   setNewStock]   = useState('');
   const [newFile,    setNewFile]    = useState(null);
   const [preview,    setPreview]    = useState(null);
   const [adding,     setAdding]     = useState(false);
@@ -289,10 +294,16 @@ function ReferencesPanel({ productId }) {
       const fd = new FormData();
       fd.append('name', newName.trim());
       fd.append('order', refs.length);
+      if (newColor.trim())    fd.append('color', newColor.trim());
+      if (newSize.trim())     fd.append('size', newSize.trim());
+      if (newMaterial.trim()) fd.append('material', newMaterial.trim());
+      if (newPrice)            fd.append('price', newPrice);
+      if (newStock)            fd.append('stock', newStock);
       if (newFile) fd.append('image', newFile);
       const { data } = await adminAPI.createReference(productId, fd);
       setRefs(prev => [...prev, data]);
-      setNewName(''); setNewFile(null); setPreview(null);
+      setNewName(''); setNewColor(''); setNewSize(''); setNewMaterial(''); setNewPrice(''); setNewStock('');
+      setNewFile(null); setPreview(null);
     } catch { setError('Erreur lors de l\'ajout.'); }
     finally { setAdding(false); }
   }
@@ -309,7 +320,7 @@ function ReferencesPanel({ productId }) {
       <label className="eth-form-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <i className="fa-solid fa-swatchbook" style={{ color: 'var(--tc-classic)', fontSize: 13 }}></i>
         Références ({refs.length})
-        <span style={{ fontSize: 11, color: 'var(--text-light)', fontWeight: 400 }}>— options de variante affichées sur la fiche produit</span>
+        <span style={{ fontSize: 11, color: 'var(--text-light)', fontWeight: 400 }}>— nom obligatoire, couleur/taille/matière/prix/stock facultatifs</span>
       </label>
 
       {/* Liste */}
@@ -324,6 +335,13 @@ function ReferencesPanel({ productId }) {
                   </div>
               }
               <div style={{ padding: '4px 6px', fontSize: 10, fontWeight: 600, color: 'var(--text-mid)', textAlign: 'center', lineHeight: 1.2 }}>{ref.name}</div>
+              {(ref.color || ref.size || ref.material || ref.price || ref.stock != null) && (
+                <div style={{ padding: '0 6px 5px', fontSize: 9, color: 'var(--text-light)', textAlign: 'center', lineHeight: 1.3 }}>
+                  {[ref.color, ref.size, ref.material].filter(Boolean).join(' · ')}
+                  {ref.price && <div>{ref.price} €</div>}
+                  {ref.stock != null && <div>Stock : {ref.stock}</div>}
+                </div>
+              )}
               <button
                 onClick={() => handleDelete(ref.id)}
                 style={{ position: 'absolute', top: 3, right: 3, width: 18, height: 18, borderRadius: '50%', background: '#EF4444', border: 'none', color: '#fff', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -336,7 +354,7 @@ function ReferencesPanel({ productId }) {
       )}
 
       {/* Formulaire ajout */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 8 }}>
         <div style={{ flex: 1, minWidth: 140 }}>
           <input
             className="form-control eth-input"
@@ -344,6 +362,53 @@ function ReferencesPanel({ productId }) {
             value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAdd()}
+            style={{ fontSize: 13 }}
+          />
+        </div>
+        <div style={{ width: 100 }}>
+          <input
+            className="form-control eth-input"
+            placeholder="Couleur"
+            value={newColor}
+            onChange={e => setNewColor(e.target.value)}
+            style={{ fontSize: 13 }}
+          />
+        </div>
+        <div style={{ width: 90 }}>
+          <input
+            className="form-control eth-input"
+            placeholder="Taille"
+            value={newSize}
+            onChange={e => setNewSize(e.target.value)}
+            style={{ fontSize: 13 }}
+          />
+        </div>
+        <div style={{ width: 110 }}>
+          <input
+            className="form-control eth-input"
+            placeholder="Matière"
+            value={newMaterial}
+            onChange={e => setNewMaterial(e.target.value)}
+            style={{ fontSize: 13 }}
+          />
+        </div>
+        <div style={{ width: 100 }}>
+          <input
+            type="number" min="0" step="0.01"
+            className="form-control eth-input"
+            placeholder="Prix (€)"
+            value={newPrice}
+            onChange={e => setNewPrice(e.target.value)}
+            style={{ fontSize: 13 }}
+          />
+        </div>
+        <div style={{ width: 90 }}>
+          <input
+            type="number" min="0" step="1"
+            className="form-control eth-input"
+            placeholder="Stock"
+            value={newStock}
+            onChange={e => setNewStock(e.target.value)}
             style={{ fontSize: 13 }}
           />
         </div>

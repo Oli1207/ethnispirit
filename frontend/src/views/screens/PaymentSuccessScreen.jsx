@@ -111,6 +111,7 @@ export default function PaymentSuccessScreen() {
               >
                 <span>
                   {item.product_name}
+                  {item.variant && <span style={{ color: 'var(--text-light)' }}> — {item.variant}</span>}
                   <span style={{ color: 'var(--text-light)', marginLeft: 6 }}>×{item.quantity}</span>
                 </span>
                 <span style={{ fontWeight: 600 }}>{formatPrice(item.subtotal)}</span>

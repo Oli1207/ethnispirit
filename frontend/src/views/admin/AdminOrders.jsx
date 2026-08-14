@@ -125,6 +125,9 @@ function OrderDetailModal({ oid, onClose }) {
                   }}>
                     <div>
                       <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{item.product_name}</span>
+                      {item.variant && (
+                        <span style={{ color: 'var(--tc-classic)', marginLeft: 8, fontWeight: 600 }}>({item.variant})</span>
+                      )}
                       <span style={{ color: 'var(--text-light)', marginLeft: 8 }}>× {item.quantity}</span>
                     </div>
                     <span style={{ fontWeight: 700, color: 'var(--tc-classic)' }}>{formatPrice(item.subtotal)}</span>

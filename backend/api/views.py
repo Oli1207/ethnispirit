@@ -389,7 +389,7 @@ def order_create(request):
     bio_subtotal  = Decimal('0')
     for ci in cart.items.select_related('product__category').all():
         universe   = (ci.product.category.universe if ci.product.category else 'mode') or 'mode'
-        item_total = ci.product.price * ci.quantity
+        item_total = ci.effective_price * ci.quantity
         if universe == 'bio':
             bio_subtotal += item_total
         else:
@@ -440,6 +440,10 @@ def order_create(request):
             p.id: p for p in
             Product.objects.select_for_update().filter(id__in=product_ids)
         }
+        locked_references = {
+            (r.product_id, r.name): r for r in
+            ProductReference.objects.select_for_update().filter(product_id__in=product_ids)
+        }
 
         unavailable = []
         insufficient = []
@@ -447,8 +451,10 @@ def order_create(request):
             p = locked_products.get(ci.product_id)
             if not p or not p.is_active:
                 unavailable.append(ci.product.name)
-            elif p.stock < ci.quantity:
-                remaining = p.stock
+                continue
+            ref = locked_references.get((ci.product_id, ci.variant)) if ci.variant else None
+            remaining = ref.stock if (ref and ref.stock is not None) else p.stock
+            if remaining < ci.quantity:
                 if remaining == 0:
                     unavailable.append(ci.product.name)
                 else:
@@ -501,7 +507,7 @@ def order_create(request):
                 order         = order,
                 product       = ci.product,
                 product_name  = ci.product.name,
-                product_price = ci.product.price,
+                product_price = ci.effective_price,
                 quantity      = ci.quantity,
                 variant       = ci.variant,
             )
@@ -598,9 +604,18 @@ def order_payment_verify(request, oid):
 
         for item in OrderItem.objects.filter(order=order):
             if item.product_id:
-                Product.objects.filter(id=item.product_id).update(
-                    stock=F('stock') - item.quantity
+                ref = (
+                    ProductReference.objects.filter(product_id=item.product_id, name=item.variant).first()
+                    if item.variant else None
                 )
+                if ref and ref.stock is not None:
+                    ProductReference.objects.filter(id=ref.id).update(
+                        stock=F('stock') - item.quantity
+                    )
+                else:
+                    Product.objects.filter(id=item.product_id).update(
+                        stock=F('stock') - item.quantity
+                    )
                 _check_stock_alert(item.product_id)
 
     # Email et push hors transaction
@@ -1065,7 +1080,16 @@ def admin_product_references(request, product_id):
     order = int(request.data.get('order', product.references.count()))
     if not name:
         return Response({'error': 'Le nom est requis.'}, status=status.HTTP_400_BAD_REQUEST)
-    ref = ProductReference(product=product, name=name, order=order)
+    ref = ProductReference(
+        product  = product,
+        name     = name,
+        order    = order,
+        color    = request.data.get('color', '').strip(),
+        size     = request.data.get('size', '').strip(),
+        material = request.data.get('material', '').strip(),
+        price    = request.data.get('price') or None,
+        stock    = request.data.get('stock') or None,
+    )
     if 'image' in request.FILES:
         ref.image = request.FILES['image']
     ref.save()
@@ -1091,6 +1115,16 @@ def admin_product_reference_detail(request, ref_id):
         ref.name = request.data['name'].strip()
     if 'order' in request.data:
         ref.order = int(request.data['order'])
+    if 'color' in request.data:
+        ref.color = request.data['color'].strip()
+    if 'size' in request.data:
+        ref.size = request.data['size'].strip()
+    if 'material' in request.data:
+        ref.material = request.data['material'].strip()
+    if 'price' in request.data:
+        ref.price = request.data['price'] or None
+    if 'stock' in request.data:
+        ref.stock = request.data['stock'] or None
     if 'image' in request.FILES:
         if ref.image:
             ref.image.delete(save=False)

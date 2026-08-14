@@ -175,6 +175,14 @@ export default function ProductDetailScreen() {
       .catch(() => {});
   }, [slug]);
 
+  // ── Quantité recadrée au stock de la référence choisie ────────────────────
+  useEffect(() => {
+    if (!product) return;
+    const ref = product.references?.find(r => r.name === selectedRef);
+    const stock = ref?.stock != null ? ref.stock : product.stock;
+    setQty(q => Math.min(Math.max(q, 1), Math.max(stock, 1)));
+  }, [selectedRef, product]);
+
   // ── Avis produit ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!slug) return;
@@ -203,13 +211,22 @@ export default function ProductDetailScreen() {
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
+  function canAddToCart() {
+    if (product.references?.length > 0 && !selectedRef) return false;
+    const ref = product.references?.find(r => r.name === selectedRef);
+    const stock = ref?.stock != null ? ref.stock : product.stock;
+    return stock > 0;
+  }
+
   function handleAddToCart() {
+    if (!canAddToCart()) return;
     addItem(product.id, qty, {}, selectedRef || '');
     setCartFeedback(true);
     setTimeout(() => setCartFeedback(false), 2500);
   }
 
   function handleBuyNow() {
+    if (!canAddToCart()) return;
     addItem(product.id, qty, {}, selectedRef || '');
     navigate('/panier');
   }
@@ -308,9 +325,15 @@ export default function ProductDetailScreen() {
     </div>
   );
 
-  const images     = product.images?.length > 0 ? product.images : [];
-  const currentImg = images[activeImg]?.image || product.main_image;
-  const savings    = product.old_price
+  const images        = product.images?.length > 0 ? product.images : [];
+  const currentImg    = images[activeImg]?.image || product.main_image;
+  const hasRefs       = product.references?.length > 0;
+  const selectedRefObj = hasRefs ? product.references.find(r => r.name === selectedRef) || null : null;
+  const effectivePrice = selectedRefObj?.price != null ? parseFloat(selectedRefObj.price) : parseFloat(product.price);
+  const effectiveStock = selectedRefObj?.stock != null ? selectedRefObj.stock : product.stock;
+  const needsRefSelection = hasRefs && !selectedRef;
+  // Économie affichée uniquement si le prix n'est pas remplacé par celui d'une référence
+  const savings    = (product.old_price && selectedRefObj?.price == null)
     ? (parseFloat(product.old_price) - parseFloat(product.price))
     : 0;
   const dist       = buildDistribution(reviews);
@@ -450,10 +473,10 @@ export default function ProductDetailScreen() {
             {/* ⑤ Prix — ancrage cognitif : ancien prix visible en premier */}
             <div className="eth-pd-price-block">
               <div className="eth-pd-price-row">
-                {product.old_price && (
+                {product.old_price && selectedRefObj?.price == null && (
                   <span className="eth-pd-old-price">{formatPrice(product.old_price)}</span>
                 )}
-                <span className="eth-pd-price">{formatPrice(product.price)}</span>
+                <span className="eth-pd-price">{formatPrice(effectivePrice)}</span>
               </div>
               {savings > 0 && (
                 <span className="eth-pd-savings">
@@ -464,10 +487,10 @@ export default function ProductDetailScreen() {
             </div>
 
             {/* ⑥ Scarcité — uniquement si stock < 5 (pression authentique) */}
-            {product.stock > 0 && product.stock < 5 && (
+            {effectiveStock > 0 && effectiveStock < 5 && (
               <div className="eth-pd-scarcity">
                 <i className="fa-solid fa-circle-exclamation"></i>
-                Plus que <strong>{product.stock} en stock</strong> — commandez vite
+                Plus que <strong>{effectiveStock} en stock</strong> — commandez vite
               </div>
             )}
 
@@ -483,17 +506,23 @@ export default function ProductDetailScreen() {
                       <i className="fa-solid fa-minus"></i>
                     </button>
                     <span className="eth-qty-val">{qty}</span>
-                    <button onClick={() => setQty(Math.min(product.stock, qty + 1))}>
+                    <button onClick={() => setQty(Math.min(Math.max(effectiveStock, 1), qty + 1))} disabled={effectiveStock <= 0}>
                       <i className="fa-solid fa-plus"></i>
                     </button>
                   </div>
                 </div>
 
                 {/* ⑧ CTA principal */}
-                {product.references?.length > 0 && !selectedRef && (
+                {needsRefSelection && (
                   <p style={{ fontSize: 12, color: 'var(--tc-classic)', marginBottom: 8, fontWeight: 600 }}>
                     <i className="fa-solid fa-swatchbook me-1"></i>
                     Sélectionnez une référence ci-dessous
+                  </p>
+                )}
+                {selectedRef && effectiveStock <= 0 && (
+                  <p style={{ fontSize: 12, color: '#B91C1C', marginBottom: 8, fontWeight: 600 }}>
+                    <i className="fa-solid fa-circle-exclamation me-1"></i>
+                    Cette référence est en rupture de stock
                   </p>
                 )}
                 {selectedRef && (
@@ -512,6 +541,8 @@ export default function ProductDetailScreen() {
                 <button
                   className={`eth-pd-cta-primary ${cartFeedback ? 'added' : ''}`}
                   onClick={handleAddToCart}
+                  disabled={needsRefSelection || effectiveStock <= 0}
+                  title={needsRefSelection ? 'Sélectionnez une référence' : undefined}
                 >
                   {cartFeedback
                     ? <><i className="fa-solid fa-circle-check me-2"></i>Ajouté au panier</>
@@ -520,7 +551,12 @@ export default function ProductDetailScreen() {
                 </button>
 
                 {/* ⑨ Acheter maintenant — friction minimale */}
-                <button className="eth-pd-cta-secondary" onClick={handleBuyNow}>
+                <button
+                  className="eth-pd-cta-secondary"
+                  onClick={handleBuyNow}
+                  disabled={needsRefSelection || effectiveStock <= 0}
+                  title={needsRefSelection ? 'Sélectionnez une référence' : undefined}
+                >
                   <i className="fa-solid fa-bolt me-2"></i>Acheter maintenant
                 </button>
 
@@ -645,41 +681,57 @@ export default function ProductDetailScreen() {
                         Choisissez une référence avant d'ajouter au panier.
                       </p>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 10 }}>
-                        {product.references.map(ref => (
-                          <button
-                            key={ref.id}
-                            type="button"
-                            onClick={() => setSelectedRef(selectedRef === ref.name ? null : ref.name)}
-                            style={{
-                              border: `2px solid ${selectedRef === ref.name ? 'var(--tc-classic)' : 'var(--sand)'}`,
-                              borderRadius: 10,
-                              background: selectedRef === ref.name ? 'rgba(198,93,59,.07)' : '#fff',
-                              padding: 0,
-                              cursor: 'pointer',
-                              overflow: 'hidden',
-                              transition: 'all .15s',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                            }}
-                          >
-                            {ref.image && (
-                              <img
-                                src={ref.image}
-                                alt={ref.name}
-                                style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }}
-                              />
-                            )}
-                            <span style={{
-                              fontSize: 11, fontWeight: 600,
-                              color: selectedRef === ref.name ? 'var(--tc-classic)' : 'var(--text-mid)',
-                              padding: '6px 4px', textAlign: 'center', lineHeight: 1.3,
-                            }}>
-                              {selectedRef === ref.name && <i className="fa-solid fa-check me-1" style={{ fontSize: 9 }}></i>}
-                              {ref.name}
-                            </span>
-                          </button>
-                        ))}
+                        {product.references.map(ref => {
+                          const outOfStock = ref.stock === 0;
+                          const details = [ref.color, ref.size, ref.material].filter(Boolean).join(' · ');
+                          return (
+                            <button
+                              key={ref.id}
+                              type="button"
+                              disabled={outOfStock}
+                              onClick={() => setSelectedRef(selectedRef === ref.name ? null : ref.name)}
+                              style={{
+                                border: `2px solid ${selectedRef === ref.name ? 'var(--tc-classic)' : 'var(--sand)'}`,
+                                borderRadius: 10,
+                                background: selectedRef === ref.name ? 'rgba(198,93,59,.07)' : '#fff',
+                                padding: 0,
+                                cursor: outOfStock ? 'not-allowed' : 'pointer',
+                                opacity: outOfStock ? 0.45 : 1,
+                                overflow: 'hidden',
+                                transition: 'all .15s',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                position: 'relative',
+                              }}
+                            >
+                              {ref.image && (
+                                <img
+                                  src={ref.image}
+                                  alt={ref.name}
+                                  style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }}
+                                />
+                              )}
+                              <span style={{
+                                fontSize: 11, fontWeight: 600,
+                                color: selectedRef === ref.name ? 'var(--tc-classic)' : 'var(--text-mid)',
+                                padding: '6px 4px 0', textAlign: 'center', lineHeight: 1.3,
+                              }}>
+                                {selectedRef === ref.name && <i className="fa-solid fa-check me-1" style={{ fontSize: 9 }}></i>}
+                                {ref.name}
+                              </span>
+                              {details && (
+                                <span style={{ fontSize: 9, color: 'var(--text-light)', padding: '0 4px', textAlign: 'center' }}>{details}</span>
+                              )}
+                              {ref.price != null && (
+                                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tc-classic)', padding: '2px 4px 6px' }}>{formatPrice(ref.price)}</span>
+                              )}
+                              {outOfStock && (
+                                <span style={{ fontSize: 9, fontWeight: 700, color: '#B91C1C', padding: '0 4px 6px' }}>Épuisé</span>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                       {selectedRef && (
                         <p style={{ fontSize: 12, color: 'var(--tc-classic)', marginTop: 10, fontWeight: 600 }}>

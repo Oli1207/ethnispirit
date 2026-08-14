@@ -52,7 +52,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 class ProductReferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model  = ProductReference
-        fields = ('id', 'name', 'image', 'order')
+        fields = ('id', 'name', 'image', 'order', 'color', 'size', 'material', 'price', 'stock')
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -100,12 +100,14 @@ class WishlistSerializer(serializers.ModelSerializer):
 
 # ── Panier ────────────────────────────────────────────────────────────────────
 class CartItemSerializer(serializers.ModelSerializer):
-    product  = ProductListSerializer(read_only=True)
-    subtotal = serializers.ReadOnlyField()
+    product        = ProductListSerializer(read_only=True)
+    subtotal       = serializers.ReadOnlyField()
+    effective_price = serializers.ReadOnlyField()
+    effective_stock = serializers.ReadOnlyField()
 
     class Meta:
         model  = CartItem
-        fields = ('id', 'product', 'quantity', 'subtotal', 'variant')
+        fields = ('id', 'product', 'quantity', 'subtotal', 'variant', 'effective_price', 'effective_stock')
 
 
 class CartSerializer(serializers.ModelSerializer):

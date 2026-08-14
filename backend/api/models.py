@@ -124,10 +124,16 @@ class ProductImage(models.Model):
 
 # ── Références produit ────────────────────────────────────────────────────────
 class ProductReference(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='references')
-    name    = models.CharField(max_length=100)
-    image   = models.ImageField(upload_to='references/', blank=True, null=True)
-    order   = models.PositiveSmallIntegerField(default=0)
+    product  = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='references')
+    name     = models.CharField(max_length=100)
+    image    = models.ImageField(upload_to='references/', blank=True, null=True)
+    order    = models.PositiveSmallIntegerField(default=0)
+    # ── Déclinaisons optionnelles — laisser vide si non applicable ──────────────
+    color    = models.CharField(max_length=50, blank=True, default='')
+    size     = models.CharField(max_length=50, blank=True, default='')
+    material = models.CharField(max_length=100, blank=True, default='')
+    price    = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Laisser vide pour garder le prix du produit")
+    stock    = models.PositiveIntegerField(null=True, blank=True, help_text="Laisser vide pour ne pas suivre de stock séparé")
 
     class Meta:
         ordering = ['order', 'id']
@@ -228,8 +234,31 @@ class CartItem(models.Model):
         return f'{self.product.name} x{self.quantity}'
 
     @property
+    def matched_reference(self):
+        """Référence produit correspondant à la variante choisie, si définie."""
+        if not self.variant:
+            return None
+        return self.product.references.filter(name=self.variant).first()
+
+    @property
+    def effective_price(self):
+        """Prix de la référence choisie si défini, sinon prix du produit."""
+        ref = self.matched_reference
+        if ref and ref.price is not None:
+            return ref.price
+        return self.product.price
+
+    @property
+    def effective_stock(self):
+        """Stock de la référence choisie si suivi séparément, sinon stock du produit."""
+        ref = self.matched_reference
+        if ref and ref.stock is not None:
+            return ref.stock
+        return self.product.stock
+
+    @property
     def subtotal(self):
-        return self.product.price * self.quantity
+        return self.effective_price * self.quantity
 
 
 # ── Commande ──────────────────────────────────────────────────────────────────

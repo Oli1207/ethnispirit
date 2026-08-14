@@ -209,14 +209,22 @@ export default function CartScreen() {
                   <Link to={`/produit/${item.product.slug}`} className="eth-cart-item-name">
                     {item.product.name}
                   </Link>
-                  <p className="eth-cart-item-price">{formatPrice(item.product.price)} / unité</p>
+                  {item.variant && (
+                    <p className="eth-cart-item-variant" style={{ fontSize: 12, color: 'var(--text-mid)', margin: '2px 0' }}>
+                      Référence : {item.variant}
+                    </p>
+                  )}
+                  <p className="eth-cart-item-price">{formatPrice(item.effective_price)} / unité</p>
                 </div>
                 <div className="eth-qty-selector">
                   <button onClick={() => updateItem(item.id, item.quantity - 1)}>
                     <i className="fa-solid fa-minus"></i>
                   </button>
                   <span className="eth-qty-val">{item.quantity}</span>
-                  <button onClick={() => updateItem(item.id, item.quantity + 1)}>
+                  <button
+                    onClick={() => updateItem(item.id, item.quantity + 1)}
+                    disabled={item.quantity >= item.effective_stock}
+                  >
                     <i className="fa-solid fa-plus"></i>
                   </button>
                 </div>
