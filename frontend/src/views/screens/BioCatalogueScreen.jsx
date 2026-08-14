@@ -49,15 +49,22 @@ export default function BioCatalogueScreen() {
     setSearchParams(next);
   }
 
-  // Certifications uniques
-  const certifications = [...new Set(products.map(p => p.certification).filter(Boolean))];
+  // Certifications uniques (insensible à la casse — "Fait main" / "FAIT MAIN" = même tag)
+  const certifications = Object.values(products.reduce((acc, p) => {
+    const raw = p.certification?.trim();
+    if (raw) {
+      const key = raw.toLowerCase();
+      if (!acc[key]) acc[key] = raw;
+    }
+    return acc;
+  }, {}));
 
   // Produits filtrés + triés
   const hasActiveFilters = sortBy || inStockOnly || activeCert;
   const displayedProducts = (() => {
     let list = [...products];
     if (inStockOnly)  list = list.filter(p => p.stock > 0);
-    if (activeCert)   list = list.filter(p => p.certification === activeCert);
+    if (activeCert)   list = list.filter(p => p.certification?.trim().toLowerCase() === activeCert.toLowerCase());
     if (sortBy === 'price_asc')  list.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
     if (sortBy === 'price_desc') list.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
     if (sortBy === 'popular')    list.sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0));
