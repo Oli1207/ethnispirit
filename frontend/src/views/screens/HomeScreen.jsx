@@ -5,10 +5,11 @@ import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
 import heroBg from '../../assets/ethni_background.jpeg';
+import storyImg from '../../assets/notre_histoire.jpeg';
 
 // ── Images Mode — femme caribéenne, mode africaine, bijoux ───────────────────
 const HERO_IMG  = heroBg;
-const STORY_IMG = 'https://images.unsplash.com/photo-1768212565424-efa3a3852b81?w=900&q=85'; // tissus africains colorés
+const STORY_IMG = storyImg;
 
 const MARQUEE_ITEMS = [
   'Artisanat Africain', 'Livraison Caraïbes', 'Fait avec Amour',
