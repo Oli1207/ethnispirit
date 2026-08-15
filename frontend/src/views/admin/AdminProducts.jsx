@@ -256,9 +256,16 @@ function Toggle({ checked, onChange }) {
   );
 }
 
-// ── Panneau Références produit (en mode édition uniquement) ──────────────────
-function ReferencesPanel({ productId }) {
-  const [refs,       setRefs]       = useState([]);
+// ── Panneau Références produit ────────────────────────────────────────────────
+// Mode édition (productId fourni) : chaque ajout/suppression appelle l'API directement.
+// Mode création (staged/onStagedChange fournis) : les références sont gardées en mémoire
+// et envoyées à l'API juste après la création du produit (voir ProductModal.save()).
+function ReferencesPanel({ productId, staged, onStagedChange }) {
+  const isStaged = productId == null;
+  const [localRefs,  setLocalRefs]  = useState([]);
+  const refs    = isStaged ? staged : localRefs;
+  const setRefs = isStaged ? onStagedChange : setLocalRefs;
+
   const [newName,    setNewName]    = useState('');
   const [newColor,   setNewColor]   = useState('');
   const [newSize,    setNewSize]    = useState('');
@@ -272,8 +279,9 @@ function ReferencesPanel({ productId }) {
   const fileRef = useRef();
 
   useEffect(() => {
+    if (isStaged) return;
     adminAPI.getReferences(productId)
-      .then(({ data }) => setRefs(data))
+      .then(({ data }) => setLocalRefs(data))
       .catch(() => {});
   }, [productId]);
 
@@ -287,9 +295,32 @@ function ReferencesPanel({ productId }) {
     e.target.value = '';
   }
 
+  function resetForm() {
+    setNewName(''); setNewColor(''); setNewSize(''); setNewMaterial(''); setNewPrice(''); setNewStock('');
+    setNewFile(null); setPreview(null);
+  }
+
   async function handleAdd() {
     if (!newName.trim()) { setError('Nom requis.'); return; }
-    setError(''); setAdding(true);
+    setError('');
+
+    if (isStaged) {
+      setRefs([...refs, {
+        id:       `tmp-${Date.now()}`,
+        name:     newName.trim(),
+        color:    newColor.trim(),
+        size:     newSize.trim(),
+        material: newMaterial.trim(),
+        price:    newPrice || null,
+        stock:    newStock === '' ? null : Number(newStock),
+        image:    preview,
+        file:     newFile,
+      }]);
+      resetForm();
+      return;
+    }
+
+    setAdding(true);
     try {
       const fd = new FormData();
       fd.append('name', newName.trim());
@@ -301,17 +332,20 @@ function ReferencesPanel({ productId }) {
       if (newStock)            fd.append('stock', newStock);
       if (newFile) fd.append('image', newFile);
       const { data } = await adminAPI.createReference(productId, fd);
-      setRefs(prev => [...prev, data]);
-      setNewName(''); setNewColor(''); setNewSize(''); setNewMaterial(''); setNewPrice(''); setNewStock('');
-      setNewFile(null); setPreview(null);
+      setRefs([...refs, data]);
+      resetForm();
     } catch { setError('Erreur lors de l\'ajout.'); }
     finally { setAdding(false); }
   }
 
   async function handleDelete(refId) {
+    if (isStaged) {
+      setRefs(refs.filter(r => r.id !== refId));
+      return;
+    }
     try {
       await adminAPI.deleteReference(refId);
-      setRefs(prev => prev.filter(r => r.id !== refId));
+      setRefs(refs.filter(r => r.id !== refId));
     } catch { setError('Erreur lors de la suppression.'); }
   }
 
@@ -358,7 +392,7 @@ function ReferencesPanel({ productId }) {
         <div style={{ flex: 1, minWidth: 140 }}>
           <input
             className="form-control eth-input"
-            placeholder="Nom de la référence (ex: Or, Argent…)"
+            placeholder="Ex : Or, Argent, Taille M…"
             value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAdd()}
@@ -456,6 +490,7 @@ function ProductModal({ product, categories, onClose, onSaved }) {
   const [existingImgs, setExistingImgs] = useState(isEdit ? (product.images || []) : []);
   const [newFiles,     setNewFiles]     = useState([]);
   const [previews,     setPreviews]     = useState([]);
+  const [stagedRefs,   setStagedRefs]   = useState([]); // références saisies avant la création du produit
   const [saving,       setSaving]       = useState(false);
   const [error,        setError]        = useState('');
   const fileRef = useRef();
@@ -503,7 +538,31 @@ function ProductModal({ product, categories, onClose, onSaved }) {
         ? (await adminAPI.updateProduct(product.id, fd)).data
         : (await adminAPI.createProduct(fd)).data;
 
+      // Le produit vient d'obtenir un id : on peut maintenant envoyer les
+      // références saisies pendant la création (impossible avant, faute d'id).
+      let refsFailed = 0;
+      if (!isEdit && stagedRefs.length > 0) {
+        for (const ref of stagedRefs) {
+          try {
+            const refFd = new FormData();
+            refFd.append('name', ref.name);
+            if (ref.color)          refFd.append('color', ref.color);
+            if (ref.size)           refFd.append('size', ref.size);
+            if (ref.material)       refFd.append('material', ref.material);
+            if (ref.price)          refFd.append('price', ref.price);
+            if (ref.stock != null)  refFd.append('stock', ref.stock);
+            if (ref.file)           refFd.append('image', ref.file);
+            await adminAPI.createReference(saved.id, refFd);
+          } catch { refsFailed += 1; }
+        }
+      }
+
       onSaved(saved, isEdit);
+      if (refsFailed > 0) {
+        // La modal se ferme sur onSaved — le produit est bien créé, seules
+        // certaines références ont échoué. On prévient via une alerte simple.
+        window.alert(`Produit créé, mais ${refsFailed} référence(s) n'ont pas pu être ajoutées. Modifiez le produit pour réessayer.`);
+      }
     } catch (err) {
       const data = err.response?.data;
       let msg = 'Une erreur est survenue. Veuillez réessayer.';
@@ -716,8 +775,11 @@ function ProductModal({ product, categories, onClose, onSaved }) {
               </p>
             </div>
 
-            {/* Références — uniquement en mode édition */}
-            {isEdit && <ReferencesPanel productId={product.id} />}
+            {/* Références — API directe en édition, en mémoire à la création (envoyées après coup) */}
+            {isEdit
+              ? <ReferencesPanel productId={product.id} />
+              : <ReferencesPanel staged={stagedRefs} onStagedChange={setStagedRefs} />
+            }
 
           </div>
         </div>
