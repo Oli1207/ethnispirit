@@ -212,13 +212,13 @@ a { text-decoration: none; color: inherit; }
   text-decoration: none;
 }
 .eth-nav-logo-img {
-  height: 52px;
+  height: 60px;
   width: auto;
   max-width: 130px;
   object-fit: contain;
   flex-shrink: 0;
-  /* PNG transparent — filtre pour teinte terracotta */
-  filter: sepia(1) saturate(3) hue-rotate(-15deg) brightness(0.88);
+  /* JPEG fond blanc — multiply fond blanc dans le beige de la navbar */
+  mix-blend-mode: multiply;
 }
 .eth-nav-logo-text {
   font-family: 'Playfair Display', serif;
@@ -347,7 +347,7 @@ a { text-decoration: none; color: inherit; }
   text-decoration: none;
 }
 .bio-nav-logo-img {
-  height: 56px;
+  height: 62px;
   width: auto;
   max-width: 160px;
   object-fit: contain;
