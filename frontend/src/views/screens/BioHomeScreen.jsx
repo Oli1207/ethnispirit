@@ -74,7 +74,7 @@ export default function BioHomeScreen() {
     );
     els.forEach(el => io.observe(el));
     return () => io.disconnect();
-  }, [featured]);
+  }, [featured, categories]);
 
   function handleNewsletter(e) {
     e.preventDefault();

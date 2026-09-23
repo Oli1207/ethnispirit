@@ -308,7 +308,7 @@ export default function CartScreen() {
               <form className="eth-promo-form" onSubmit={handlePromoCheck}>
                 <input
                   type="text"
-                  placeholder="Ex : ETHNI10"
+                  placeholder="Code promo"
                   value={promoCode}
                   onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoError(''); }}
                   disabled={promoLoading}

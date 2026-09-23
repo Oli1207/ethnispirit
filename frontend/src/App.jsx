@@ -14,7 +14,6 @@ import Navbar        from './components/Navbar';
 import Footer        from './components/Footer';
 import BioNavbar     from './components/BioNavbar';
 import BioFooter     from './components/BioFooter';
-import WelcomeModal  from './components/WelcomeModal';
 import PrivateRoute from './layout/PrivateRoute';
 import AdminRoute   from './layout/AdminRoute';
 
@@ -87,7 +86,6 @@ function ModeLayout() {
   return (
     <>
       <Navbar />
-      <WelcomeModal currentUniverse="mode" />
       <main style={{ flex: 1 }}>
         <Outlet />
       </main>
@@ -100,7 +98,6 @@ function BioLayout() {
   return (
     <>
       <BioNavbar />
-      <WelcomeModal currentUniverse="bio" />
       <main style={{ flex: 1 }}>
         <Outlet />
       </main>

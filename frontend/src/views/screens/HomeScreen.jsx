@@ -64,7 +64,7 @@ export default function HomeScreen() {
     );
     els.forEach(el => io.observe(el));
     return () => io.disconnect();
-  }, [featured]);
+  }, [featured, categories]);
 
   function handleNewsletter(e) {
     e.preventDefault();
@@ -305,19 +305,6 @@ export default function HomeScreen() {
           </div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          PROMO STRIP
-      ══════════════════════════════════════════════════════════════════ */}
-      <div className="lp-promo-strip" data-reveal="fade">
-        <i className="fa-solid fa-tag"></i>
-        <span>1ère commande :</span>
-        <span className="lp-promo-code">ETHNI10</span>
-        <span>— 10% de réduction</span>
-        <Link to="/catalogue" className="lp-promo-cta">
-          En profiter <i className="fa-solid fa-arrow-right ms-1"></i>
-        </Link>
-      </div>
 
       {/* ══════════════════════════════════════════════════════════════════
           TÉMOIGNAGES
