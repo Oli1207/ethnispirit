@@ -26,6 +26,7 @@ from .serializers import (
     PromoCodeCheckSerializer, PromoCodeSerializer, NewsletterSubscribeSerializer,
     ProductReviewSerializer,
 )
+from .permissions import staff_permission
 from . import stripe_service
 
 
@@ -159,17 +160,24 @@ def cart_update(request, item_id):
     if quantity is None:
         return Response({'error': 'quantity requis.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Vérification de propriété : le cart_id doit correspondre au panier de l'item
+    # Vérification de propriété : le cart_id est OBLIGATOIRE et doit correspondre au panier de l'item
+    # (les id d'articles sont des entiers séquentiels : sans cette preuve, n'importe qui pourrait
+    # modifier le panier d'un autre visiteur en énumérant les numéros).
     cart_id = request.data.get('cart_id')
+    if not cart_id:
+        return Response({'error': 'cart_id requis.'}, status=status.HTTP_400_BAD_REQUEST)
     try:
         item = CartItem.objects.select_related('cart').get(id=item_id)
     except CartItem.DoesNotExist:
         return Response({'error': 'Article introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
-    if cart_id and str(item.cart.cart_id) != str(cart_id):
+    if str(item.cart.cart_id) != str(cart_id):
         return Response({'error': 'Accès non autorisé à cet article.'}, status=status.HTTP_403_FORBIDDEN)
 
-    quantity = int(quantity)
+    try:
+        quantity = int(quantity)
+    except (TypeError, ValueError):
+        return Response({'error': 'quantity invalide.'}, status=status.HTTP_400_BAD_REQUEST)
     if quantity <= 0:
         item.delete()
     else:
@@ -184,14 +192,16 @@ def cart_update(request, item_id):
 @permission_classes([AllowAny])
 @throttle_classes([CartWriteThrottle])
 def cart_remove(request, item_id):
-    # Vérification de propriété : le cart_id doit correspondre au panier de l'item
+    # Vérification de propriété : le cart_id est OBLIGATOIRE et doit correspondre au panier de l'item
     cart_id = request.query_params.get('cart_id')
+    if not cart_id:
+        return Response({'error': 'cart_id requis.'}, status=status.HTTP_400_BAD_REQUEST)
     try:
         item = CartItem.objects.select_related('cart').get(id=item_id)
     except CartItem.DoesNotExist:
         return Response({'error': 'Article introuvable.'}, status=status.HTTP_404_NOT_FOUND)
 
-    if cart_id and str(item.cart.cart_id) != str(cart_id):
+    if str(item.cart.cart_id) != str(cart_id):
         return Response({'error': 'Accès non autorisé à cet article.'}, status=status.HTTP_403_FORBIDDEN)
 
     cart = item.cart
@@ -786,7 +796,7 @@ def contact_send(request):
 
 # ── Admin — Messages de contact ──────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('messages_view')])
 def admin_contacts_list(request):
     qs = ContactMessage.objects.all().order_by('-date')
     data = list(qs.values('id', 'name', 'email', 'subject', 'message', 'is_read', 'date'))
@@ -794,7 +804,7 @@ def admin_contacts_list(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('messages_view')])
 def admin_contact_mark_read(request, msg_id):
     try:
         msg = ContactMessage.objects.get(id=msg_id)
@@ -806,7 +816,7 @@ def admin_contact_mark_read(request, msg_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('messages_view')])
 def admin_contact_delete(request, msg_id):
     try:
         ContactMessage.objects.get(id=msg_id).delete()
@@ -901,7 +911,7 @@ def product_request_create(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_view')])
 def admin_product_requests_list(request):
     qs = ProductRequest.objects.all().order_by('-date')
     data = []
@@ -919,7 +929,7 @@ def admin_product_requests_list(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_view')])
 def admin_product_request_handle(request, req_id):
     try:
         pr = ProductRequest.objects.get(id=req_id)
@@ -957,7 +967,7 @@ def newsletter_subscribe(request):
 
 # ── Newsletter — liste admin ──────────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def newsletter_subscribers(request):
     from .serializers import NewsletterSubscribeSerializer
     qs = NewsletterSubscriber.objects.all().order_by('-date')
@@ -967,7 +977,7 @@ def newsletter_subscribers(request):
 
 # ── Commande — mise à jour statut (admin) ─────────────────────────────────────
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('orders_manage', 'orders_status_only')])
 def order_update_status(request, oid):
     try:
         order = Order.objects.get(oid=oid)
@@ -982,7 +992,7 @@ def order_update_status(request, oid):
 
 # ── Commandes — liste admin (toutes) ─────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('orders_view')])
 def admin_orders_list(request):
     qs = Order.objects.all().select_related('promo_code').prefetch_related('items').order_by('-date')
     serializer = OrderSerializer(qs, many=True)
@@ -991,7 +1001,7 @@ def admin_orders_list(request):
 
 # ── Admin — CRUD Produits ─────────────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_view')])
 def admin_products_list(request):
     qs     = Product.objects.prefetch_related('images').select_related('category').order_by('-date')
     search = request.query_params.get('search', '')
@@ -1001,7 +1011,7 @@ def admin_products_list(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage')])
 def admin_product_create(request):
     serializer = ProductWriteSerializer(data=request.data)
     if not serializer.is_valid():
@@ -1027,7 +1037,7 @@ def admin_product_create(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage')])
 def admin_product_update(request, product_id):
     try:
         product = Product.objects.prefetch_related('images').get(id=product_id)
@@ -1058,7 +1068,7 @@ def admin_product_update(request, product_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage')])
 def admin_product_delete(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
@@ -1069,7 +1079,7 @@ def admin_product_delete(request, product_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage')])
 def admin_product_image_delete(request, image_id):
     try:
         img = ProductImage.objects.select_related('product').get(id=image_id)
@@ -1100,7 +1110,7 @@ def _invalid_image_response(files):
 
 # ── Admin — Références produit ───────────────────────────────────────────────
 @api_view(['GET', 'POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage', GET='products_view')])
 def admin_product_references(request, product_id):
     try:
         product = Product.objects.get(id=product_id)
@@ -1136,7 +1146,7 @@ def admin_product_references(request, product_id):
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage')])
 def admin_product_reference_detail(request, ref_id):
     try:
         ref = ProductReference.objects.select_related('product').get(id=ref_id)
@@ -1177,7 +1187,7 @@ def admin_product_reference_detail(request, ref_id):
 
 # ── Admin — CRUD Catégories ───────────────────────────────────────────────────
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('categories_manage')])
 def admin_category_create(request):
     serializer = CategoryWriteSerializer(data=request.data)
     if not serializer.is_valid():
@@ -1190,7 +1200,7 @@ def admin_category_create(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('categories_manage')])
 def admin_category_update(request, category_id):
     try:
         category = Category.objects.get(id=category_id)
@@ -1204,7 +1214,7 @@ def admin_category_update(request, category_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('categories_manage')])
 def admin_category_delete(request, category_id):
     try:
         category = Category.objects.get(id=category_id)
@@ -1216,7 +1226,7 @@ def admin_category_delete(request, category_id):
 
 # ── Admin — CRUD Zones de livraison ──────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_shipping_list(request):
     zones = ShippingZone.objects.all()
     return Response([{
@@ -1232,7 +1242,7 @@ def admin_shipping_list(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_shipping_create(request):
     zone = ShippingZone.objects.create(
         name         = request.data.get('name', ''),
@@ -1251,7 +1261,7 @@ def admin_shipping_create(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_shipping_update(request, zone_id):
     try:
         zone = ShippingZone.objects.get(id=zone_id)
@@ -1278,7 +1288,7 @@ def admin_shipping_update(request, zone_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_shipping_delete(request, zone_id):
     try:
         ShippingZone.objects.get(id=zone_id).delete()
@@ -1289,7 +1299,7 @@ def admin_shipping_delete(request, zone_id):
 
 # ── Admin — statistiques ───────────────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('orders_view', 'analytics_view')])
 def admin_stats(request):
     from django.db.models import Sum, Count
     total_orders   = Order.objects.count()
@@ -1306,7 +1316,7 @@ def admin_stats(request):
 
 # ── Admin — Commande détail ───────────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('orders_view')])
 def admin_order_detail(request, oid):
     try:
         order = Order.objects.prefetch_related('items').select_related('promo_code').get(oid=oid)
@@ -1317,14 +1327,14 @@ def admin_order_detail(request, oid):
 
 # ── Admin — Codes promo CRUD ──────────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('promo_manage')])
 def admin_promo_list(request):
     qs = PromoCode.objects.all().order_by('-id')
     return Response(PromoCodeSerializer(qs, many=True).data)
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('promo_manage')])
 def admin_promo_create(request):
     serializer = PromoCodeSerializer(data=request.data)
     if not serializer.is_valid():
@@ -1334,7 +1344,7 @@ def admin_promo_create(request):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('promo_manage')])
 def admin_promo_update(request, promo_id):
     try:
         promo = PromoCode.objects.get(id=promo_id)
@@ -1348,7 +1358,7 @@ def admin_promo_update(request, promo_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('promo_manage')])
 def admin_promo_delete(request, promo_id):
     try:
         PromoCode.objects.get(id=promo_id).delete()
@@ -1497,7 +1507,7 @@ def track_event(request):
 
 # ── Dashboard analytics admin ─────────────────────────────────────────────────
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('analytics_view')])
 def admin_analytics(request):
     from django.db.models import Sum, Count, Avg
     from django.db.models.functions import TruncDate
@@ -1749,7 +1759,7 @@ def welcome_promo_settings(request):
 
 # ── Modal de bienvenue — PATCH admin ─────────────────────────────────────────
 @api_view(['PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('promo_manage')])
 def admin_welcome_promo_update(request):
     """Met à jour les paramètres du modal de bienvenue (admin seulement)."""
     s = WelcomePromoSettings.get_settings()
@@ -1923,7 +1933,7 @@ def product_related(request, slug):
 # ══════════════════════════════════════════════════════════════════════════════
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('orders_view')])
 def admin_orders_export_csv(request):
     """
     GET /api/admin/orders/export-csv/
@@ -2036,7 +2046,7 @@ def order_track(request):
 # ══════════════════════════════════════════════════════════════════════════════
 
 @api_view(['GET', 'PATCH'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_manage', GET='products_view')])
 def admin_stock_alerts(request):
     """
     GET  /api/admin/stock-alerts/ — settings + produits sous seuil
@@ -2122,7 +2132,7 @@ def notify_restock(request, slug):
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('products_view')])
 def admin_restock_notifications(request):
     """
     GET /api/admin/restock-notifications/
@@ -2227,7 +2237,7 @@ def _staff_profile_to_dict(profile, request=None):
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_staff_list(request):
     """
     GET /api/admin/staff/
@@ -2239,7 +2249,7 @@ def admin_staff_list(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_staff_create(request):
     """
     POST /api/admin/staff/
@@ -2325,7 +2335,7 @@ def admin_staff_create(request):
 
 
 @api_view(['PATCH', 'DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_staff_detail(request, staff_id):
     """
     PATCH /api/admin/staff/<id>/  — met à jour rôle, permissions, univers, is_active
@@ -2379,7 +2389,7 @@ def admin_staff_detail(request, staff_id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([staff_permission('staff_manage')])
 def admin_role_permissions(request):
     """
     GET /api/admin/staff/role-permissions/

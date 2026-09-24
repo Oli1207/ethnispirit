@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { adminAPI, categoriesAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
 import MobileBackButton from '../../components/MobileBackButton';
+import useAuthStore from '../../store/auth';
+import { hasPermission } from '../../utils/permissions';
 
 // ── Panneau alertes de stock ───────────────────────────────────────────────────
 function StockAlertsPanel() {
+  const canEdit = hasPermission(useAuthStore((s) => s.user), 'products_manage');
   const [settings, setSettings]       = useState(null);
   const [threshold, setThreshold]     = useState('');
   const [email, setEmail]             = useState('');
@@ -126,6 +129,7 @@ function StockAlertsPanel() {
             </div>
           </div>
 
+          {canEdit ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
             <button
               onClick={handleSave}
@@ -144,6 +148,11 @@ function StockAlertsPanel() {
               </span>
             )}
           </div>
+          ) : (
+            <p style={{ fontSize: 12, color: 'var(--text-light)', marginBottom: 28 }}>
+              <i className="fa-solid fa-lock me-1"></i>Lecture seule — la modification des alertes est réservée à la gestion du catalogue.
+            </p>
+          )}
 
           {/* Demandes de réapprovisionnement clients */}
           <p style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--text-light)', marginBottom: 12 }}>
@@ -839,6 +848,7 @@ function DeleteConfirm({ item, label, onConfirm, onCancel }) {
 
 // ── Page principale ────────────────────────────────────────────────────────────
 export default function AdminProducts() {
+  const canManage = hasPermission(useAuthStore((s) => s.user), 'products_manage');
   const [products,    setProducts]    = useState([]);
   const [categories,  setCategories]  = useState([]);
   const [loading,     setLoading]     = useState(true);
@@ -892,9 +902,11 @@ export default function AdminProducts() {
             <p className="eth-section-label">Administration</p>
             <h1 className="eth-section-title">Gestion des <em>produits</em></h1>
           </div>
-          <button onClick={() => setModal({ product: null })} className="btn-eth-primary" style={{ padding: '11px 24px' }}>
-            <i className="fa-solid fa-plus me-2"></i>Nouveau produit
-          </button>
+          {canManage && (
+            <button onClick={() => setModal({ product: null })} className="btn-eth-primary" style={{ padding: '11px 24px' }}>
+              <i className="fa-solid fa-plus me-2"></i>Nouveau produit
+            </button>
+          )}
         </div>
       </div>
 
@@ -966,10 +978,13 @@ export default function AdminProducts() {
                         </span>
                       </td>
                       <td>
-                        <Toggle checked={p.is_active} onChange={() => toggleActive(p)} />
+                        {canManage
+                          ? <Toggle checked={p.is_active} onChange={() => toggleActive(p)} />
+                          : <span style={{ fontSize: 12, color: 'var(--text-mid)' }}>{p.is_active ? 'Actif' : 'Inactif'}</span>}
                       </td>
                       <td><Badge universe={p.universe} /></td>
                       <td>
+                        {canManage && (
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                           <button
                             onClick={() => setModal({ product: p })}
@@ -987,6 +1002,7 @@ export default function AdminProducts() {
                             <i className="fa-solid fa-trash"></i>
                           </button>
                         </div>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -3,6 +3,8 @@ import axiosInstance from '../../utils/axios';
 import { adminAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
 import MobileBackButton from '../../components/MobileBackButton';
+import useAuthStore from '../../store/auth';
+import { hasPermission } from '../../utils/permissions';
 
 const STATUS_LABELS = {
   pending:    'En attente',
@@ -167,6 +169,8 @@ function OrderDetailModal({ oid, onClose }) {
 
 // ── Page principale ───────────────────────────────────────────────────────────
 export default function AdminOrders() {
+  const user = useAuthStore((s) => s.user);
+  const canChangeStatus = hasPermission(user, 'orders_manage') || hasPermission(user, 'orders_status_only');
   const [orders, setOrders]         = useState([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState('');
@@ -325,6 +329,8 @@ export default function AdminOrders() {
                               color: sc.color, fontWeight: 600,
                             }}
                             value={order.status}
+                            disabled={!canChangeStatus}
+                            title={canChangeStatus ? undefined : 'Votre rôle ne permet pas de modifier le statut'}
                             onChange={(e) => handleStatusChange(order.oid, e.target.value)}
                           >
                             {STATUS_OPTIONS.map(([k, v]) => (
