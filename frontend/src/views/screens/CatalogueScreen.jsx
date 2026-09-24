@@ -5,6 +5,7 @@ import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
+import QueuedImage from '../../components/QueuedImage';
 
 export default function CatalogueScreen() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -253,7 +254,7 @@ export default function CatalogueScreen() {
                 <Link to={`/produit/${product.slug}`}>
                   <div className="eth-product-img-wrap">
                     {product.main_image ? (
-                      <img src={product.main_image} alt={product.name} className="eth-product-img" loading="lazy" decoding="async" />
+                      <QueuedImage src={product.main_image} alt={product.name} className="eth-product-img" />
                     ) : (
                       <div className="eth-product-img-placeholder">
                         <i className="fa-solid fa-image"></i>

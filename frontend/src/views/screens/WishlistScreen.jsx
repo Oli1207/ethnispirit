@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { wishlistAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
+import QueuedImage from '../../components/QueuedImage';
 
 export default function WishlistScreen() {
   const [items, setItems]     = useState([]);
@@ -66,12 +67,10 @@ export default function WishlistScreen() {
                 <Link to={`/produit/${item.product.slug}`}>
                   <div className="eth-product-img-wrap">
                     {item.product.main_image ? (
-                      <img
+                      <QueuedImage
                         src={item.product.main_image}
                         alt={item.product.name}
                         className="eth-product-img"
-                        loading="lazy"
-                        decoding="async"
                       />
                     ) : (
                       <div className="eth-product-img-placeholder">

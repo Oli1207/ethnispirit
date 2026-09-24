@@ -5,6 +5,7 @@ import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
 import heroBgImg from '../../assets/ethni_background.jpeg';
+import QueuedImage from '../../components/QueuedImage';
 
 // ── Images Bio — huiles, soins naturels, plantes tropicales ───────────────────
 const HERO_BG   = heroBgImg;
@@ -207,7 +208,7 @@ export default function BioHomeScreen() {
                 data-reveal
                 data-delay={i > 0 ? String(i) : undefined}
               >
-                <img src={cat.image || BIO_CAT_IMGS[i]} alt={cat.name} className="blp-cat-img" loading="lazy" decoding="async" />
+                <QueuedImage src={cat.image || BIO_CAT_IMGS[i]} alt={cat.name} className="blp-cat-img" />
                 <div className="blp-cat-overlay">
                   <div className="blp-cat-text">
                     <div className="blp-cat-icon"><i className={`fa-solid ${BIO_CAT_ICONS[i]}`} /></div>
@@ -255,7 +256,7 @@ export default function BioHomeScreen() {
                 <div key={p.id} className="blp-product-card" data-reveal data-delay={i > 0 ? String(i) : undefined}>
                   <Link to={`/bio/produit/${p.slug}`} className="blp-product-img-wrap">
                     {p.main_image
-                      ? <img src={p.main_image} alt={p.name} className="blp-product-img" loading="lazy" decoding="async" />
+                      ? <QueuedImage src={p.main_image} alt={p.name} className="blp-product-img" />
                       : <div className="blp-product-img-ph"><i className="fa-solid fa-leaf" /></div>}
                     {p.discount_percent > 0 && <span className="blp-badge-disc">−{p.discount_percent}%</span>}
                     <div className="blp-product-actions">

@@ -2,6 +2,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Dev : VITE_PROXY_TARGET=https://backend.ethnispirit.com (avec VITE_API_URL=/) permet de
+// tester le front local sur les vraies données de production, sans blocage CORS.
+const PROXY_TARGET = process.env.VITE_PROXY_TARGET || 'http://localhost:8000';
+
 export default defineConfig({
   plugins: [
     react(),
@@ -69,11 +73,13 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: PROXY_TARGET,
         changeOrigin: true,
+        secure: true,
       },
       '/media': {
-        target: 'http://localhost:8000',
+        target: PROXY_TARGET,
+        secure: true,
         changeOrigin: true,
       },
     },

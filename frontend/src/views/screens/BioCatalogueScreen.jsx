@@ -5,6 +5,7 @@ import { formatPrice } from '../../utils/currency';
 import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
+import QueuedImage from '../../components/QueuedImage';
 
 export default function BioCatalogueScreen() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -225,7 +226,7 @@ export default function BioCatalogueScreen() {
                 <Link to={`/bio/produit/${product.slug}`}>
                   <div className="bio-product-img-wrap">
                     {product.main_image ? (
-                      <img src={product.main_image} alt={product.name} className="bio-product-img" loading="lazy" decoding="async" />
+                      <QueuedImage src={product.main_image} alt={product.name} className="bio-product-img" />
                     ) : (
                       <div className="bio-product-img-placeholder">
                         <i className="fa-solid fa-leaf"></i>

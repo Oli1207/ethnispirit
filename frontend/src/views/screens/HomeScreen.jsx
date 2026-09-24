@@ -6,6 +6,7 @@ import useCartStore from '../../store/cart';
 import SEO from '../../components/SEO';
 import heroBg from '../../assets/ethni_background.jpeg';
 import storyImg from '../../assets/notre_histoire.jpeg';
+import QueuedImage from '../../components/QueuedImage';
 
 // ── Images Mode — femme caribéenne, mode africaine, bijoux ───────────────────
 const HERO_IMG  = heroBg;
@@ -177,7 +178,7 @@ export default function HomeScreen() {
               ];
               return (
                 <Link key={cat.id} to={`/catalogue?category=${cat.slug}`} className={`lp-cat-card lp-cat-${i}`} data-reveal data-delay={i > 0 ? String(i) : undefined}>
-                  <img src={cat.image || CAT_IMGS[i % CAT_IMGS.length]} alt={cat.name} className="lp-cat-img" loading="lazy" decoding="async" />
+                  <QueuedImage src={cat.image || CAT_IMGS[i % CAT_IMGS.length]} alt={cat.name} className="lp-cat-img" />
                   <div className="lp-cat-overlay">
                     <div className="lp-cat-text">
                       <p className="lp-cat-sub">{cat.product_count || '—'} articles</p>
@@ -224,7 +225,7 @@ export default function HomeScreen() {
                 <div key={p.id} className="lp-product-card" data-reveal data-delay={i > 0 ? String(i) : undefined}>
                   <Link to={`/produit/${p.slug}`} className="lp-product-img-wrap">
                     {p.main_image
-                      ? <img src={p.main_image} alt={p.name} className="lp-product-img" loading="lazy" decoding="async" />
+                      ? <QueuedImage src={p.main_image} alt={p.name} className="lp-product-img" />
                       : <div className="lp-product-img-ph"><i className="fa-solid fa-image"></i></div>}
                     {p.discount_percent > 0 && <span className="lp-badge-disc">−{p.discount_percent}%</span>}
                     <div className="lp-product-actions">

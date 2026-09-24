@@ -71,7 +71,7 @@ function SimilarCard({ product, isBio }) {
     <Link to={`${isBio ? '/bio' : ''}/produit/${product.slug}`} className="eth-similar-card">
       <div className="eth-similar-card-img">
         {product.main_image
-          ? <img src={product.main_image} alt={product.name} loading="lazy" decoding="async" />
+          ? <QueuedImage src={product.main_image} alt={product.name} />
           : <div className="eth-similar-card-placeholder"><i className="fa-solid fa-image"></i></div>
         }
         {product.discount_percent > 0 && (
