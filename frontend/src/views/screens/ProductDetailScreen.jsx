@@ -71,7 +71,7 @@ function SimilarCard({ product, isBio }) {
     <Link to={`${isBio ? '/bio' : ''}/produit/${product.slug}`} className="eth-similar-card">
       <div className="eth-similar-card-img">
         {product.main_image
-          ? <img src={product.main_image} alt={product.name} />
+          ? <img src={product.main_image} alt={product.name} loading="lazy" decoding="async" />
           : <div className="eth-similar-card-placeholder"><i className="fa-solid fa-image"></i></div>
         }
         {product.discount_percent > 0 && (
@@ -413,7 +413,7 @@ export default function ProductDetailScreen() {
                     className={`eth-thumb ${idx === activeImg ? 'active' : ''}`}
                     onClick={() => setActiveImg(idx)}
                   >
-                    <img src={img.image} alt="" />
+                    <img src={img.thumbnail || img.image} alt="" loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>
@@ -709,6 +709,8 @@ export default function ProductDetailScreen() {
                                 <img
                                   src={ref.image}
                                   alt={ref.name}
+                                  loading="lazy"
+                                  decoding="async"
                                   style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }}
                                 />
                               )}

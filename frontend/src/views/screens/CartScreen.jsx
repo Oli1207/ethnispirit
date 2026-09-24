@@ -199,7 +199,7 @@ export default function CartScreen() {
             {cart.items.map((item) => (
               <div className="eth-cart-item" key={item.id}>
                 {item.product.main_image ? (
-                  <img src={item.product.main_image} alt={item.product.name} className="eth-cart-item-img" />
+                  <img src={item.product.main_image} alt={item.product.name} className="eth-cart-item-img" loading="lazy" decoding="async" />
                 ) : (
                   <div className="eth-cart-item-img" style={{ background: 'var(--sand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-light)' }}>
                     <i className="fa-solid fa-image"></i>

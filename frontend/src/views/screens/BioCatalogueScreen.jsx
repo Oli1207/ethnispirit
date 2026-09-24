@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { categoriesAPI, productsAPI } from '../../utils/api';
 import { formatPrice } from '../../utils/currency';
@@ -70,6 +70,31 @@ export default function BioCatalogueScreen() {
     if (sortBy === 'popular')    list.sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0));
     return list;
   })();
+
+
+  // ── Affichage progressif ─────────────────────────────────────────────────
+  // On ne monte dans le DOM que 24 cartes à la fois : les images des cartes suivantes
+  // ne sont même pas demandées tant que l'utilisateur n'approche pas du bas de la grille.
+  const PAGE_SIZE = 24;
+  const sentinelRef = useRef(null);
+  const filterKey = [activeCategory, search, sortBy, inStockOnly, activeCert].join('|');
+  // Le compteur est lié à la combinaison de filtres : un changement de filtre repart à 24
+  // (dérivé pendant le rendu, sans effet ni re-rendu en cascade).
+  const [limit, setLimit] = useState({ key: filterKey, count: PAGE_SIZE });
+  const visibleCount = limit.key === filterKey ? limit.count : PAGE_SIZE;
+  const showMore = () => setLimit({ key: filterKey, count: visibleCount + PAGE_SIZE });
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || visibleCount >= displayedProducts.length) return;
+    const io = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) showMore(); },
+      { rootMargin: '600px 0px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleCount, displayedProducts.length, filterKey]);
+  const visibleProducts = displayedProducts.slice(0, visibleCount);
 
   return (
     <div className="bio-catalogue-page">
@@ -195,12 +220,12 @@ export default function BioCatalogueScreen() {
           </div>
         ) : (
           <div className="bio-products-grid">
-            {displayedProducts.map((product) => (
+            {visibleProducts.map((product) => (
               <div className="bio-product-card" key={product.id}>
                 <Link to={`/bio/produit/${product.slug}`}>
                   <div className="bio-product-img-wrap">
                     {product.main_image ? (
-                      <img src={product.main_image} alt={product.name} className="bio-product-img" />
+                      <img src={product.main_image} alt={product.name} className="bio-product-img" loading="lazy" decoding="async" />
                     ) : (
                       <div className="bio-product-img-placeholder">
                         <i className="fa-solid fa-leaf"></i>
@@ -235,6 +260,13 @@ export default function BioCatalogueScreen() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {!loading && visibleCount < displayedProducts.length && (
+          <div ref={sentinelRef} style={{ textAlign: 'center', padding: '28px 0 8px' }}>
+            <button type="button" className="btn-eth-outline" onClick={showMore}>
+              Voir plus de produits ({displayedProducts.length - visibleCount} restants)
+            </button>
           </div>
         )}
       </div>

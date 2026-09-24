@@ -70,6 +70,8 @@ export default function WishlistScreen() {
                         src={item.product.main_image}
                         alt={item.product.name}
                         className="eth-product-img"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="eth-product-img-placeholder">

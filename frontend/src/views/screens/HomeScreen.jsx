@@ -177,7 +177,7 @@ export default function HomeScreen() {
               ];
               return (
                 <Link key={cat.id} to={`/catalogue?category=${cat.slug}`} className={`lp-cat-card lp-cat-${i}`} data-reveal data-delay={i > 0 ? String(i) : undefined}>
-                  <img src={cat.image || CAT_IMGS[i % CAT_IMGS.length]} alt={cat.name} className="lp-cat-img" />
+                  <img src={cat.image || CAT_IMGS[i % CAT_IMGS.length]} alt={cat.name} className="lp-cat-img" loading="lazy" decoding="async" />
                   <div className="lp-cat-overlay">
                     <div className="lp-cat-text">
                       <p className="lp-cat-sub">{cat.product_count || '—'} articles</p>
@@ -224,7 +224,7 @@ export default function HomeScreen() {
                 <div key={p.id} className="lp-product-card" data-reveal data-delay={i > 0 ? String(i) : undefined}>
                   <Link to={`/produit/${p.slug}`} className="lp-product-img-wrap">
                     {p.main_image
-                      ? <img src={p.main_image} alt={p.name} className="lp-product-img" loading="eager" />
+                      ? <img src={p.main_image} alt={p.name} className="lp-product-img" loading="lazy" decoding="async" />
                       : <div className="lp-product-img-ph"><i className="fa-solid fa-image"></i></div>}
                     {p.discount_percent > 0 && <span className="lp-badge-disc">−{p.discount_percent}%</span>}
                     <div className="lp-product-actions">
@@ -261,7 +261,7 @@ export default function HomeScreen() {
         <div className="lp-story-inner">
           <div className="lp-story-visual" data-reveal="slide-left">
             <div className="lp-story-img-main">
-              <img src={STORY_IMG} alt="Artisanat" />
+              <img src={STORY_IMG} alt="Artisanat" loading="lazy" decoding="async" />
             </div>
             <div className="lp-story-float-card">
               <i className="fa-solid fa-hands-holding"></i>
@@ -367,8 +367,8 @@ export default function HomeScreen() {
             </Link>
           </div>
           <div className="lp-bio-visual" data-reveal data-delay="2">
-            <img src="https://images.unsplash.com/photo-1560769680-ba2f3767c785?w=700&q=85" alt="Huile de coco naturelle" className="lp-bio-img" />
-            <img src="https://images.unsplash.com/photo-1671492246169-cdd6305870a0?w=400&q=85" alt="Huiles essentielles" className="lp-bio-img-sm" />
+            <img src="https://images.unsplash.com/photo-1560769680-ba2f3767c785?w=700&q=85" alt="Huile de coco naturelle" className="lp-bio-img" loading="lazy" decoding="async" />
+            <img src="https://images.unsplash.com/photo-1671492246169-cdd6305870a0?w=400&q=85" alt="Huiles essentielles" className="lp-bio-img-sm" loading="lazy" decoding="async" />
           </div>
         </div>
       </section>

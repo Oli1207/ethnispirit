@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../store/auth';
 import useCartStore from '../store/cart';
-import logoBio from '../assets/logo_ethnispirit_mode.jpeg';
+import logoBio from '../assets/logo_ethnispirit_mode_nav.webp';
 import useFavicon from '../hooks/useFavicon';
 
 export default function Navbar() {

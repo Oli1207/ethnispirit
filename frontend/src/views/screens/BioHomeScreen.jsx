@@ -207,7 +207,7 @@ export default function BioHomeScreen() {
                 data-reveal
                 data-delay={i > 0 ? String(i) : undefined}
               >
-                <img src={cat.image || BIO_CAT_IMGS[i]} alt={cat.name} className="blp-cat-img" />
+                <img src={cat.image || BIO_CAT_IMGS[i]} alt={cat.name} className="blp-cat-img" loading="lazy" decoding="async" />
                 <div className="blp-cat-overlay">
                   <div className="blp-cat-text">
                     <div className="blp-cat-icon"><i className={`fa-solid ${BIO_CAT_ICONS[i]}`} /></div>
@@ -255,7 +255,7 @@ export default function BioHomeScreen() {
                 <div key={p.id} className="blp-product-card" data-reveal data-delay={i > 0 ? String(i) : undefined}>
                   <Link to={`/bio/produit/${p.slug}`} className="blp-product-img-wrap">
                     {p.main_image
-                      ? <img src={p.main_image} alt={p.name} className="blp-product-img" />
+                      ? <img src={p.main_image} alt={p.name} className="blp-product-img" loading="lazy" decoding="async" />
                       : <div className="blp-product-img-ph"><i className="fa-solid fa-leaf" /></div>}
                     {p.discount_percent > 0 && <span className="blp-badge-disc">−{p.discount_percent}%</span>}
                     <div className="blp-product-actions">
@@ -296,7 +296,7 @@ export default function BioHomeScreen() {
         <div className="blp-story-inner">
           <div className="blp-story-visual" data-reveal="slide-left">
             <div className="blp-story-img-main">
-              <img src={STORY_IMG} alt="Ingrédients naturels" />
+              <img src={STORY_IMG} alt="Ingrédients naturels" loading="lazy" decoding="async" />
             </div>
             <div className="blp-story-float-card">
               <i className="fa-solid fa-seedling" />
@@ -411,8 +411,8 @@ export default function BioHomeScreen() {
             </Link>
           </div>
           <div className="blp-mode-visual" data-reveal data-delay="2">
-            <img src="https://images.unsplash.com/photo-1664151099399-d41ed991a10d?w=700&q=85" alt="Mode africaine" className="blp-mode-img" />
-            <img src="https://images.unsplash.com/photo-1757140448448-90ed1f18fcbb?w=400&q=85" alt="Bijoux africains" className="blp-mode-img-sm" />
+            <img src="https://images.unsplash.com/photo-1664151099399-d41ed991a10d?w=700&q=85" alt="Mode africaine" className="blp-mode-img" loading="lazy" decoding="async" />
+            <img src="https://images.unsplash.com/photo-1757140448448-90ed1f18fcbb?w=400&q=85" alt="Bijoux africains" className="blp-mode-img-sm" loading="lazy" decoding="async" />
           </div>
         </div>
       </section>
