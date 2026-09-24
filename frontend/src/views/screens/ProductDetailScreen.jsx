@@ -8,6 +8,7 @@ import useTracking from '../../hooks/useTracking';
 import SEO from '../../components/SEO';
 import MobileBackButton from '../../components/MobileBackButton';
 import ProductRequestModal from '../../components/ProductRequestModal';
+import QueuedImage from '../../components/QueuedImage';
 
 // ── Sélecteur d'étoiles interactif ────────────────────────────────────────────
 function StarSelector({ value, onChange }) {
