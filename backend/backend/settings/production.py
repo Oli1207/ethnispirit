@@ -36,6 +36,16 @@ SECURE_SSL_REDIRECT           = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE    = True
 
+# ── Cache : compteurs de rate limiting PARTAGÉS entre les processus Passenger ──
+# (le cache par défaut, en mémoire, est propre à chaque processus : les plafonds seraient
+# multipliés par le nombre de workers et remis à zéro à chaque redémarrage).
+CACHES = {
+    'default': {
+        'BACKEND':  'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': env.str('CACHE_DIR', default=str(BASE_DIR / 'cache')),
+    }
+}
+
 # ── Fichiers statiques (pas de dossier static/ local sur le serveur) ──────────
 STATICFILES_DIRS = []
 

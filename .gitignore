@@ -19,6 +19,7 @@ ENV/
 backend/.env
 backend/.env.production
 backend/vapid_private.pem
+backend/cache/
 frontend/.env
 frontend/.env.local
 frontend/.env.production

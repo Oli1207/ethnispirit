@@ -1,5 +1,33 @@
 Options -MultiViews
 RewriteEngine On
+
+# ── Cache navigateur ──────────────────────────────────────────────────────────
+# Marquage par variables d'environnement (posées AVANT la règle SPA plus bas)
+# /assets/*  : fichiers Vite au nom haché (contenu change => nom change) : cache 1 an
+RewriteRule ^assets/ - [E=ETH_CACHE_IMMUTABLE:1]
+# /media/*   : photos produits (un nouvel upload = un nouveau nom de fichier) : 30 jours
+RewriteRule ^media/  - [E=ETH_CACHE_MEDIA:1]
+# /icons/*   : favicons/icônes (noms fixes) : 1 semaine
+RewriteRule ^icons/  - [E=ETH_CACHE_ICONS:1]
+
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=31536000, immutable" env=ETH_CACHE_IMMUTABLE
+  Header set Cache-Control "public, max-age=2592000" env=ETH_CACHE_MEDIA
+  Header set Cache-Control "public, max-age=604800" env=ETH_CACHE_ICONS
+
+  # Ces fichiers doivent toujours être revalidés (nouvelle version du site / service worker)
+  <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # ── En-têtes de sécurité ────────────────────────────────────────────────────
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self)"
+</IfModule>
+
+# ── Routing React (SPA) ───────────────────────────────────────────────────────
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ /index.html [QSA,L]

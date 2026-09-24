@@ -6,6 +6,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
 from userauths.models import User
+from .imaging import optimize_field, make_thumbnail, FULL_SIDE, CARD_SIDE, REF_SIDE
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+        optimize_field(self.image, CARD_SIDE)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -97,13 +99,26 @@ class Product(models.Model):
             return int((1 - self.price / self.old_price) * 100)
         return 0
 
+    def _primary_image(self):
+        # all() plutôt que filter() : réutilise le prefetch_related('images') (pas de requête par produit)
+        imgs = sorted(self.images.all(), key=lambda i: i.id)
+        for img in imgs:
+            if img.is_main:
+                return img
+        return imgs[0] if imgs else None
+
     @property
     def main_image(self):
-        img = self.images.filter(is_main=True).first()
-        if img:
-            return img.image.url
-        img = self.images.first()
+        img = self._primary_image()
         return img.image.url if img else None
+
+    @property
+    def main_thumbnail(self):
+        """Miniature légère de l'image principale (retombe sur l'image complète si absente)."""
+        img = self._primary_image()
+        if not img:
+            return None
+        return img.thumbnail.url if img.thumbnail else img.image.url
 
     def __str__(self):
         return self.name
@@ -111,12 +126,25 @@ class Product(models.Model):
 
 # ── Images produit ────────────────────────────────────────────────────────────
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image   = models.ImageField(upload_to='products/')
-    is_main = models.BooleanField(default=False)
+    product   = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image     = models.ImageField(upload_to='products/')
+    thumbnail = models.ImageField(upload_to='products/thumbs/', blank=True, null=True)
+    is_main   = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'Images produit'
+
+    def save(self, *args, **kwargs):
+        # Nouvelle image uploadée : version WebP réduite + miniature
+        original_name = self.image.name if self.image else ''
+        pil = optimize_field(self.image, FULL_SIDE)
+        if pil is not None:
+            try:
+                name, content = make_thumbnail(pil, original_name)
+                self.thumbnail.save(name, content, save=False)
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Image — {self.product.name}'
@@ -138,6 +166,10 @@ class ProductReference(models.Model):
     class Meta:
         ordering = ['order', 'id']
         verbose_name_plural = 'Références produit'
+
+    def save(self, *args, **kwargs):
+        optimize_field(self.image, REF_SIDE)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.name} — {self.product.name}'
@@ -552,6 +584,12 @@ class ProductRequest(models.Model):
         ordering = ['-date']
         verbose_name        = 'Demande de produit'
         verbose_name_plural = 'Demandes de produit'
+
+    def save(self, *args, **kwargs):
+        # Upload public : le fichier est ré-encodé en WebP (jamais stocké tel quel, extension
+        # d'origine incluse) — écarte les fichiers déguisés (.php, .html, .svg…).
+        optimize_field(self.photo, FULL_SIDE)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Demande — {self.name or "Anonyme"} — {self.date.strftime("%d/%m/%Y")}'

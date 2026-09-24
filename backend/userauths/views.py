@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes, throttle_cla
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from api.throttles import LoginThrottle, PasswordResetThrottle
+from api.throttles import LoginThrottle, PasswordResetThrottle, RegisterThrottle
 
 from .models import User, Profile
 from .serializers import (
@@ -30,6 +30,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 # ── Inscription ───────────────────────────────────────────────────────────────
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([RegisterThrottle])
 def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():

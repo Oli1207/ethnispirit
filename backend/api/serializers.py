@@ -31,14 +31,18 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model  = ProductImage
-        fields = ('id', 'image', 'is_main')
+        fields = ('id', 'image', 'thumbnail', 'is_main')
 
 
 class ProductListSerializer(serializers.ModelSerializer):
-    main_image       = serializers.ReadOnlyField()
+    # Les listes (catalogue, panier, accueil…) affichent des cartes : miniature légère
+    main_image       = serializers.SerializerMethodField()
     discount_percent = serializers.ReadOnlyField()
     category_name    = serializers.CharField(source='category.name', read_only=True)
     universe         = serializers.CharField(source='category.universe', read_only=True)
+
+    def get_main_image(self, obj):
+        return obj.main_thumbnail
 
     class Meta:
         model  = Product
@@ -198,6 +202,19 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ('oid', 'status', 'date')
 
 
+class OrderPublicSerializer(OrderSerializer):
+    """
+    Version SANS données personnelles (nom, email, téléphone, adresse) d'une commande.
+    Pour les endpoints publics (vérification de paiement) : l'identifiant de commande
+    (ETH-00015…) est séquentiel donc devinable, il ne doit jamais suffire à lire des données perso.
+    """
+    class Meta(OrderSerializer.Meta):
+        fields = (
+            'id', 'oid', 'status', 'total', 'total_discount', 'shipping_cost',
+            'items', 'promo_code_used', 'promos_breakdown', 'date',
+        )
+
+
 class OrderCreateSerializer(serializers.Serializer):
     cart_id       = serializers.UUIDField()
     full_name     = serializers.CharField(max_length=200)
@@ -240,11 +257,14 @@ class ProductWriteSerializer(serializers.ModelSerializer):
 class AdminProductSerializer(serializers.ModelSerializer):
     """Retourné par les endpoints admin — inclut is_active, images complètes, category_id."""
     images        = ProductImageSerializer(many=True, read_only=True)
-    main_image    = serializers.ReadOnlyField()
+    main_image    = serializers.SerializerMethodField()
     category_id   = serializers.IntegerField(source='category.id',       read_only=True, allow_null=True)
     category_name = serializers.CharField(source='category.name',         read_only=True, allow_null=True)
     universe      = serializers.CharField(source='category.universe',     read_only=True, allow_null=True)
     discount_percent = serializers.ReadOnlyField()
+
+    def get_main_image(self, obj):
+        return obj.main_thumbnail
 
     class Meta:
         model  = Product

@@ -94,17 +94,33 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.AllowAny",
     ),
-    # ── Rate limiting (anti brute-force) ──────────────────────────────────────
+    # ── Rate limiting (par IP) — voir api/throttles.py ─────────────────────────
     "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
-        "rest_framework.throttling.UserRateThrottle",
+        "api.throttles.AnonBurstThrottle",
+        "api.throttles.AnonSustainedThrottle",
+        "api.throttles.UserBurstThrottle",
+        "api.throttles.UserSustainedThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "300/hour",       # visiteurs anonymes — global
-        "user": "2000/hour",      # utilisateurs connectés — global
-        "login": "10/minute",     # endpoint /auth/token/  (brute force)
-        "password_reset": "5/minute",  # /auth/forgot-password/
-        "promo": "30/minute",     # /promo/check/  (devinette de codes)
+        # Plafonds globaux larges : bloquent robots/scrapers, pas les vrais visiteurs
+        "anon_burst":      "300/minute",
+        "anon_sustained":  "6000/hour",
+        "user_burst":      "600/minute",
+        "user_sustained":  "20000/hour",
+        # Endpoints sensibles (plus stricts)
+        "login":           "10/minute",   # /auth/token/  (brute force)
+        "password_reset":  "5/minute",    # /auth/forgot-password/
+        "promo":           "30/minute",   # /promo/check/  (devinette de codes)
+        "register":        "10/hour",     # création de comptes
+        "order_create":    "20/hour",     # commandes / checkouts SumUp
+        "order_track":     "10/minute",   # suivi oid + email
+        "order_verify":    "60/minute",   # retour de paiement
+        "contact":         "5/hour",      # formulaire de contact
+        "newsletter":      "10/hour",
+        "product_request": "5/hour",      # demande de produit (+ photo)
+        "restock":         "10/hour",
+        "tracking":        "300/minute",  # analytics
+        "cart_write":      "120/minute",
     },
 }
 

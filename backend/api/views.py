@@ -7,7 +7,9 @@ from rest_framework.decorators import api_view, permission_classes, throttle_cla
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
-from .throttles import PromoCheckThrottle
+from .throttles import (
+    PromoCheckThrottle, CartWriteThrottle, ContactThrottle, NewsletterThrottle, OrderCreateThrottle, OrderTrackThrottle, OrderVerifyThrottle, ProductRequestThrottle, RestockThrottle, TrackingThrottle,
+)
 from .models import (
     Category, Product, ProductImage, ProductReference, Wishlist, PromoCode,
     Cart, CartItem, Order, OrderItem, NewsletterSubscriber, ProductReview, ShippingZone,
@@ -17,7 +19,7 @@ from .models import (
 )
 from .serializers import (
     CategorySerializer, CategoryWriteSerializer,
-    ProductListSerializer, ProductDetailSerializer, ProductReferenceSerializer,
+    ProductListSerializer, ProductDetailSerializer, ProductReferenceSerializer, OrderPublicSerializer,
     AdminProductSerializer, ProductWriteSerializer,
     WishlistSerializer, CartSerializer, CartItemSerializer,
     OrderSerializer, OrderCreateSerializer,
@@ -43,7 +45,7 @@ def categories_list(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def products_list(request):
-    qs = Product.objects.filter(is_active=True).select_related('category')
+    qs = Product.objects.filter(is_active=True).select_related('category').prefetch_related('images')
 
     universe = request.query_params.get('universe')
     category = request.query_params.get('category')
@@ -122,6 +124,7 @@ def cart_detail(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([CartWriteThrottle])
 def cart_add(request):
     cart_id    = request.data.get('cart_id')
     product_id = request.data.get('product_id')
@@ -150,6 +153,7 @@ def cart_add(request):
 
 @api_view(['PATCH'])
 @permission_classes([AllowAny])
+@throttle_classes([CartWriteThrottle])
 def cart_update(request, item_id):
     quantity = request.data.get('quantity')
     if quantity is None:
@@ -178,6 +182,7 @@ def cart_update(request, item_id):
 
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
+@throttle_classes([CartWriteThrottle])
 def cart_remove(request, item_id):
     # Vérification de propriété : le cart_id doit correspondre au panier de l'item
     cart_id = request.query_params.get('cart_id')
@@ -325,6 +330,7 @@ def order_detail(request, oid):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([OrderCreateThrottle])
 def order_create(request):
     serializer = OrderCreateSerializer(data=request.data)
     if not serializer.is_valid():
@@ -551,10 +557,14 @@ def order_create(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([OrderVerifyThrottle])
 def order_payment_verify(request, oid):
     """
     Appelé depuis PaymentSuccessScreen après redirection SumUp.
     Vérifie le statut du checkout SumUp et marque la commande payée si besoin.
+
+    Endpoint public et oid séquentiel : ne renvoie AUCUNE donnée personnelle
+    (OrderPublicSerializer) — la page de confirmation n'affiche que oid, total et articles.
     """
     # ── 1. Vérifier que la commande existe ────────────────────────────────────
     try:
@@ -564,7 +574,7 @@ def order_payment_verify(request, oid):
 
     # Déjà payée — retourner immédiatement
     if order.status == 'paid':
-        return Response(OrderSerializer(order).data)
+        return Response(OrderPublicSerializer(order).data)
 
     if not order.sumup_checkout_id:
         return Response({'error': 'Checkout SumUp introuvable.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -575,7 +585,7 @@ def order_payment_verify(request, oid):
         checkout = sumup.get_checkout(order.sumup_checkout_id)
     except Exception:
         return Response({
-            **OrderSerializer(order).data,
+            **OrderPublicSerializer(order).data,
             '_sumup_pending': True,
         })
 
@@ -585,7 +595,7 @@ def order_payment_verify(request, oid):
         pass  # → continuer vers mise à jour DB
     elif sumup_status in ('PENDING', 'PROCESSING'):
         return Response({
-            **OrderSerializer(order).data,
+            **OrderPublicSerializer(order).data,
             '_sumup_pending': True,
         })
     else:
@@ -597,7 +607,7 @@ def order_payment_verify(request, oid):
         order = Order.objects.select_for_update().get(oid=oid)
         if order.status == 'paid':
             order_full = Order.objects.prefetch_related('items').get(oid=oid)
-            return Response(OrderSerializer(order_full).data)
+            return Response(OrderPublicSerializer(order_full).data)
 
         order.status = 'paid'
         order.save(update_fields=['status'])
@@ -636,7 +646,7 @@ def order_payment_verify(request, oid):
         )
     except Exception:
         pass
-    return Response(OrderSerializer(order).data)
+    return Response(OrderPublicSerializer(order).data)
 
 
 # ── Avis produit ─────────────────────────────────────────────────────────────
@@ -702,6 +712,7 @@ def product_review_delete(request, slug):
 # ── Formulaire de contact ─────────────────────────────────────────────────────
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([ContactThrottle])
 def contact_send(request):
     from django.conf import settings
     from django.core.mail import send_mail
@@ -807,6 +818,7 @@ def admin_contact_delete(request, msg_id):
 # ── Demande de produit ────────────────────────────────────────────────────────
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([ProductRequestThrottle])
 def product_request_create(request):
     from django.conf import settings
     from django.core.mail import send_mail
@@ -818,6 +830,12 @@ def product_request_create(request):
     name  = request.data.get('name', '').strip()
     email = request.data.get('email', '').strip()
     photo = request.FILES.get('photo')
+    if photo:
+        from .imaging import validate_image_upload
+        try:
+            validate_image_upload(photo)
+        except ValueError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
     pr = ProductRequest.objects.create(
         name=name,
@@ -915,6 +933,7 @@ def admin_product_request_handle(request, req_id):
 # ── Newsletter ────────────────────────────────────────────────────────────────
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([NewsletterThrottle])
 def newsletter_subscribe(request):
     serializer = NewsletterSubscribeSerializer(data=request.data)
     if not serializer.is_valid():
@@ -987,6 +1006,9 @@ def admin_product_create(request):
     serializer = ProductWriteSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    bad = _invalid_image_response(request.FILES.getlist('images'))
+    if bad:
+        return bad
     try:
         with transaction.atomic():
             product = serializer.save()
@@ -1014,6 +1036,9 @@ def admin_product_update(request, product_id):
     serializer = ProductWriteSerializer(product, data=request.data, partial=True)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    bad = _invalid_image_response(request.FILES.getlist('images'))
+    if bad:
+        return bad
     try:
         with transaction.atomic():
             product   = serializer.save()
@@ -1062,6 +1087,17 @@ def admin_product_image_delete(request, image_id):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+def _invalid_image_response(files):
+    """400 si l'un des fichiers n'est pas une vraie image (contenu vérifié), sinon None."""
+    from .imaging import validate_image_upload
+    for f in files:
+        try:
+            validate_image_upload(f)
+        except ValueError as exc:
+            return Response({'error': f'{f.name} : {exc}'}, status=status.HTTP_400_BAD_REQUEST)
+    return None
+
+
 # ── Admin — Références produit ───────────────────────────────────────────────
 @api_view(['GET', 'POST'])
 @permission_classes([IsAdminUser])
@@ -1091,6 +1127,9 @@ def admin_product_references(request, product_id):
         stock    = request.data.get('stock') or None,
     )
     if 'image' in request.FILES:
+        bad = _invalid_image_response([request.FILES['image']])
+        if bad:
+            return bad
         ref.image = request.FILES['image']
     ref.save()
     return Response(ProductReferenceSerializer(ref, context={'request': request}).data, status=status.HTTP_201_CREATED)
@@ -1126,6 +1165,9 @@ def admin_product_reference_detail(request, ref_id):
     if 'stock' in request.data:
         ref.stock = request.data['stock'] or None
     if 'image' in request.FILES:
+        bad = _invalid_image_response([request.FILES['image']])
+        if bad:
+            return bad
         if ref.image:
             ref.image.delete(save=False)
         ref.image = request.FILES['image']
@@ -1368,6 +1410,7 @@ def _get_real_ip(request):
 # ── Créer / récupérer une session analytics ───────────────────────────────────
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([TrackingThrottle])
 def track_session(request):
     data       = request.data
     session_id = data.get('session_id', '').strip()
@@ -1411,6 +1454,7 @@ def track_session(request):
 # ── Enregistrer un événement ──────────────────────────────────────────────────
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([TrackingThrottle])
 def track_event(request):
     data       = request.data
     session_id = data.get('session_id', '').strip()
@@ -1943,6 +1987,7 @@ def admin_orders_export_csv(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@throttle_classes([OrderTrackThrottle])
 def order_track(request):
     """
     GET /api/orders/track/?oid=X&email=Y
@@ -2047,6 +2092,7 @@ def admin_stock_alerts(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([RestockThrottle])
 def notify_restock(request, slug):
     """
     POST /api/products/<slug>/notify-restock/
@@ -2116,6 +2162,7 @@ def admin_restock_notifications(request):
 
 @api_view(['PATCH'])
 @permission_classes([AllowAny])
+@throttle_classes([CartWriteThrottle])
 def cart_update_email(request):
     """
     PATCH /api/cart/email/
